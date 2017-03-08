@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>PID demo page</title>
+	<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="container">
+	<h1>PID demo</h1>
+	<h2>Basics</h2>
+	<p>
+		A simple example: a piece of metal that we want to heat to certain temperature and keep it at that temperature. People usually demonstrate how PID works with a car model, but I don't have driving licence, so I will describe something that I have experience with.
+	</p>
+	<p>
+		Imagine we have a piece that we want to heat. We plug a thermocouple to it, wrap it with a heating tape, plug this heating tape via relay to the power and plug our controller to this relay so we can switch heating on and off. And let's say we want to heat it to <b>200°C</b>.
+	</p>
+	<h3>Relay behaviour</h3>
+	<p>
+		The most simple thing that you can try is to heat if the temperature is below your setpoint and switch heating off if we are above the setpoint. Makes sence, but let's see how it will look like:
+	</p>
+	<div id="relay-pid" class="pid">
+	</div>
+	<p>
+		You see that there are constant oscillations in temperature and huge overheat in the very beginning. We can do better.
+	</p>
+	<h3>P-controller</h3>
+	<h3>PI-controller</h3>
+	<h3>PID-controller</h3>
+	<h3>Ramping</h3>
+	<h2>Digital PID control</h2>
+	<h3>Limited output and Integral part</h3>
+	<h3>Digitalization</h3>
+
+	<h3>Filtering the data</h3>
+	<h4>Mean filter</h4>
+	<h4>Exponential mean filter</h4>
+	<h4>Kalman filter</h4>
+
+	<h3>Noize and Differential part</h3>
+
+	<h2>Autotuning</h2>
+	<h3>Autotuning algorithms</h3>
+	<h3>Autotuning with noize</h3>
+</div>
+
+<script src="https://code.highcharts.com/highcharts.js"></script>
+<script src="https://code.highcharts.com/modules/exporting.js"></script>
+
+<script src="pid.js"></script>
+<script type="text/javascript">
+	relayPID = PID({
+		element: "relay-pid",
+		tset: 200,
+		mode: "relay",
+		system: Bulk({
+			q_in: 2000, // heat that we get from the heating tape
+			c_heat: 1, // heat capacitance of the heating region
+			c_det: 1, // heat capacitance of the detection region
+			t_heat: 20, // temperature of the heating region
+			t_det: 20, // temperature of the detection region
+			kappa_int: 10, // heat conductivity within a bulk
+			kappa_ext: 1, // heat conductivity to external bath
+			t_ext: 20,	// external temperature
+		}),
+		dt: 0.01, // time step
+		t: 3, // full time range
+	});
+
+</script>
+</body>
+</html>
