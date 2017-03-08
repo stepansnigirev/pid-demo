@@ -5,26 +5,46 @@ Highcharts.setOptions(Highcharts.theme);
 
 function Bulk(options){
 	var bulk = options;
-	bulk.evaluate = function(dt, heat_rate){
+	bulk.heat_data = [[0, bulk.t_heat]];
+	bulk.det_data = [[0, bulk.t_det]];
+	bulk._t = 0;
+	bulk._evaluate = function(dt, heat_rate){
 		var qhd = bulk.kappa_int * (bulk.t_heat - bulk.t_det) * dt;
 		var qho = bulk.kappa_ext * (bulk.t_heat - bulk.t_ext) * dt;
 		var qdo = bulk.kappa_ext * (bulk.t_det - bulk.t_ext) * dt;
 		var qh = bulk.q_in * heat_rate * dt;
 		bulk.t_heat += (qh - qho - qhd) / bulk.c_heat;
 		bulk.t_det += (qhd - qdo) / bulk.c_det;
-	}
+		bulk._t += dt;
+		var lastt = bulk.heat_data[bulk.heat_data.length-1][0];
+		if(bulk._t - lastt >= bulk.t_sample){
+			bulk.heat_data.push([bulk._t, bulk.t_heat]);
+			bulk.det_data.push([bulk._t, bulk.t_det]);
+		}
+	};
+	bulk.evaluate = function(dt, heat_rate){
+		for (var t = 0; t < dt; t+=options.dt) {
+			var delta = (t+options.dt < dt) ? options.dt : (dt-t)
+			bulk._evaluate(delta, heat_rate);
+		}
+	};
 	return bulk;
 }
 
 function PID(options){
 	var blk = options.system;
-	var data_heat = [];
-	var data_det = [];
+	// var data_heat = [];
+	// var data_det = [];
 	var dt = options.dt;
 	var tset = options.tset;
+	var lastt = 0;
+	// var tstep = options.t/500;
 	for (var t = 0; t < options.t; t+=dt) {
-		data_heat.push([t,blk.t_heat]);
-		data_det.push([t,blk.t_det]);
+		// if(t-lastt > tstep){
+		// 	lastt=t;
+		// 	data_heat.push([t,blk.t_heat]);
+		// 	data_det.push([t,blk.t_det]);
+		// }
 		switch(options.mode){
 			case "relay":
 				out = (blk.t_det < tset) ? 1 : 0;
@@ -38,6 +58,24 @@ function PID(options){
 		chart: {
             zoomType: 'x'
         },
+	    plotOptions: {
+	        series: {
+	            marker: {
+	                fillColor: '#FFFFFF',
+	                lineWidth: 2,
+	                lineColor: null, // inherit from series
+	                symbol: "circle"
+	            }
+	        }
+	    },
+	    tooltip: {
+	        formatter: function() {
+		        return this.x.toFixed(2) + '<br>' +
+		        	'<b style="color: '+this.point.color + '; font-weight: bold;">' +
+		        	this.series.name + '</b>: <b>' +
+		        	this.y.toFixed(2) + '</b> °C';
+		    }
+	    },
 		title: "",
 	    yAxis: {
 	        title: {
@@ -52,10 +90,10 @@ function PID(options){
 
 	    series: [{
 	        name: 'Heating region',
-	        data: data_heat
+	        data: blk.heat_data
 	    },{
 	        name: 'Detection region',
-	        data: data_det
+	        data: blk.det_data
 	    }]
 
 	});

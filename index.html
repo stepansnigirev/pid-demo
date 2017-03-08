@@ -3,8 +3,25 @@
 <head>
 	<title>PID demo page</title>
 	<link rel="stylesheet" href="style.css">
+
+	<script src="highcharts.js"></script>
+	<script src="pid.js"></script>
 </head>
 <body>
+<script type="text/javascript">
+var common = {
+	tset: 200,
+	q_in: 4000,
+	c_heat: 3,
+	c_det: 3,
+	t_room: 20,
+	kappa_int: 30,
+	kappa_ext: 1,
+	dt: 0.000001,
+	t: 3,
+	t_sample: 0.001,
+}
+</script>
 
 <div class="container">
 	<h1>PID demo</h1>
@@ -21,8 +38,55 @@
 	</p>
 	<div id="relay-pid" class="pid">
 	</div>
+	<script type="text/javascript">
+		relayPID = PID({
+			element: "relay-pid",
+			tset: common.tset,
+			mode: "relay",
+			system: Bulk({
+				q_in: common.q_in, // heat that we get from the heating tape
+				c_heat: common.c_heat, // heat capacitance of the heating region
+				c_det: common.c_det, // heat capacitance of the detection region
+				t_heat: common.t_room, // temperature of the heating region
+				t_det: common.t_room, // temperature of the detection region
+				kappa_int: common.kappa_int, // heat conductivity within a bulk
+				kappa_ext: common.kappa_ext, // heat conductivity to external bath
+				t_ext: common.t_room,	// external temperature
+				dt: common.dt, // simulating step
+				t_sample: common.t_sample,
+			}),
+			dt: common.dt, // time step
+			t: common.t, // detection step
+		});
+	</script>
 	<p>
-		You see that there are constant oscillations in temperature and huge overheat in the very beginning. We can do better.
+		You see that there is a huge overheat in the beginning and some oscillations in the temperature that damping with time. In this model we could switch the relay very fast, but in reality switching is limited by the physical implementation of the relay. Taking into account that we can switch with some time resolution, we will end up with this:
+	</p>
+	<div id="relay-pid2" class="pid">
+	</div>
+	<script type="text/javascript">
+		relayPID = PID({
+			element: "relay-pid2",
+			tset: common.tset,
+			mode: "relay",
+			system: Bulk({
+				q_in: common.q_in, // heat that we get from the heating tape
+				c_heat: common.c_heat, // heat capacitance of the heating region
+				c_det: common.c_det, // heat capacitance of the detection region
+				t_heat: common.t_room, // temperature of the heating region
+				t_det: common.t_room, // temperature of the detection region
+				kappa_int: common.kappa_int, // heat conductivity within a bulk
+				kappa_ext: common.kappa_ext, // heat conductivity to external bath
+				t_ext: common.t_room,	// external temperature
+				dt: common.dt, // simulating step
+				t_sample: common.t_sample,
+			}),
+			dt: 1/60, // time step
+			t: common.t, // detection step
+		});
+	</script>
+	<p>
+		Here situation is even worse — we get constant oscillations in temperature that never dissapear. Funny thing is that switching time of the relay here is just 1 second, and oscillations are much larger — about 10-20 seconds. We can do better.
 	</p>
 	<h3>P-controller</h3>
 	<h3>PI-controller</h3>
@@ -44,29 +108,6 @@
 	<h3>Autotuning with noize</h3>
 </div>
 
-<script src="https://code.highcharts.com/highcharts.js"></script>
-<script src="https://code.highcharts.com/modules/exporting.js"></script>
 
-<script src="pid.js"></script>
-<script type="text/javascript">
-	relayPID = PID({
-		element: "relay-pid",
-		tset: 200,
-		mode: "relay",
-		system: Bulk({
-			q_in: 2000, // heat that we get from the heating tape
-			c_heat: 1, // heat capacitance of the heating region
-			c_det: 1, // heat capacitance of the detection region
-			t_heat: 20, // temperature of the heating region
-			t_det: 20, // temperature of the detection region
-			kappa_int: 10, // heat conductivity within a bulk
-			kappa_ext: 1, // heat conductivity to external bath
-			t_ext: 20,	// external temperature
-		}),
-		dt: 0.01, // time step
-		t: 3, // full time range
-	});
-
-</script>
 </body>
 </html>
