@@ -6,6 +6,13 @@
 
 	<script src="highcharts.js"></script>
 	<script src="pid.js"></script>
+
+	<script src='https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML'></script>
+	<script type="text/x-mathjax-config">
+	MathJax.Hub.Config({
+	  tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}
+	});
+	</script>
 </head>
 <body>
 <script type="text/javascript">
@@ -16,9 +23,9 @@ var common = {
 	c_det: 3,
 	t_room: 20,
 	kappa_int: 30,
-	kappa_ext: 1,
+	kappa_ext: 3,
 	dt: 0.000001,
-	t: 3,
+	t: 2,
 	t_sample: 0.001,
 }
 </script>
@@ -36,10 +43,9 @@ var common = {
 	<p>
 		The most simple thing that you can try is to heat if the temperature is below your setpoint and switch heating off if we are above the setpoint. Makes sence, but let's see how it will look like:
 	</p>
-	<div id="relay-pid" class="pid">
-	</div>
+	<div id="relay-pid" class="pid"></div>
 	<script type="text/javascript">
-		relayPID = PID({
+		PID({
 			element: "relay-pid",
 			tset: common.tset,
 			mode: "relay",
@@ -53,7 +59,7 @@ var common = {
 				kappa_ext: common.kappa_ext, // heat conductivity to external bath
 				t_ext: common.t_room,	// external temperature
 				dt: common.dt, // simulating step
-				t_sample: common.t_sample,
+				t_sample: common.t_sample, // sampling rate for the data array
 			}),
 			dt: common.dt, // time step
 			t: common.t, // detection step
@@ -65,7 +71,7 @@ var common = {
 	<div id="relay-pid2" class="pid">
 	</div>
 	<script type="text/javascript">
-		relayPID = PID({
+		PID({
 			element: "relay-pid2",
 			tset: common.tset,
 			mode: "relay",
@@ -79,7 +85,7 @@ var common = {
 				kappa_ext: common.kappa_ext, // heat conductivity to external bath
 				t_ext: common.t_room,	// external temperature
 				dt: common.dt, // simulating step
-				t_sample: common.t_sample,
+				t_sample: common.t_sample, // sampling rate for the data array
 			}),
 			dt: 1/60, // time step
 			t: common.t, // detection step
@@ -89,9 +95,122 @@ var common = {
 		Here situation is even worse — we get constant oscillations in temperature that never dissapear. Funny thing is that switching time of the relay here is just 1 second, and oscillations are much larger — about 10-20 seconds. We can do better.
 	</p>
 	<h3>P-controller</h3>
+	<p>
+		To prevent system from overshoot we can make the heating rate to be proportional to the temperature difference between current temperature of the system and the setpoint. To do it with a relay we can use PWM (pulse width modulation). Let's say we choose an interval of 1 second and during this second switch on the relay for some time $\tau$ and switch off for the rest of the interval. In such a way we can get an output to be anything from 0 to 1.
+	</p>
+	<p>
+		We will calculate $\tau$ as $\tau = out = k_P \cdot (T_{set}-T)$, where $k_P$ is a proportional gain of our P-controller. Relay mode that we had before is simply a subset of a P-controller with $k_P=\infty$.
+	</p>
+	<p>
+		By choosing a reasonable $k_P$ we can heat up the system without overshoots:
+	</p>
+	<div id="p-pid" class="pid"></div>
+	<script type="text/javascript">
+		PID({
+			element: "p-pid",
+			tset: common.tset,
+			mode: "pid",
+			kp: 0.01,
+			ki: 0,
+			kd: 0,
+			system: Bulk({
+				q_in: common.q_in, // heat that we get from the heating tape
+				c_heat: common.c_heat, // heat capacitance of the heating region
+				c_det: common.c_det, // heat capacitance of the detection region
+				t_heat: common.t_room, // temperature of the heating region
+				t_det: common.t_room, // temperature of the detection region
+				kappa_int: common.kappa_int, // heat conductivity within a bulk
+				kappa_ext: common.kappa_ext, // heat conductivity to external bath
+				t_ext: common.t_room,	// external temperature
+				dt: common.dt, // simulating step
+				t_sample: common.t_sample, // sampling rate for the data array
+			}),
+			dt: 1/60, // time step
+			t: common.t, // detection step
+		});
+	</script>
+	<p>
+		Looks much better already! We don't have any oscillations and also we don't overshoot, at least in the measured value. But we've got another problem — the system is at slightly lower temperature than we need. We could increase a setpoint to overcome this, but it is a bad way of doing that — if properties of the system will change we will end up at some other temperature. We don't want that, so we need to make better.
+	</p>
 	<h3>PI-controller</h3>
+	<p>
+		The problem that we have is very simple - we can't stay at target temperature because at this temperature our ouput will be zero and we can't compensate for the environment that cools our system to the room temperature.
+	</p>
+	<p>
+		To solve this problem let's add a small integral part to our controller, so if we are constantly below the set point error will add up and output will get to some value that is enough to compensate cooling from the environment.
+	</p>
+	<p>
+		Now our output calculation will look like this:
+	</p>
+	<p>
+		$$ out = k_P \cdot (T_{set}-T) + k_I \cdot \int_{0}^{t} (T_{set}-T) dt $$
+	</p>
+	<div id="pi-pid" class="pid"></div>
+	<script type="text/javascript">
+		PID({
+			element: "pi-pid",
+			tset: common.tset,
+			mode: "pid",
+			kp: 0.01,
+			ki: 0.008,
+			kd: 0,
+			system: Bulk({
+				q_in: common.q_in, // heat that we get from the heating tape
+				c_heat: common.c_heat, // heat capacitance of the heating region
+				c_det: common.c_det, // heat capacitance of the detection region
+				t_heat: common.t_room, // temperature of the heating region
+				t_det: common.t_room, // temperature of the detection region
+				kappa_int: common.kappa_int, // heat conductivity within a bulk
+				kappa_ext: common.kappa_ext, // heat conductivity to external bath
+				t_ext: common.t_room,	// external temperature
+				dt: common.dt, // simulating step
+				t_sample: common.t_sample, // sampling rate for the data array
+			}),
+			dt: 1/60, // time step
+			t: common.t, // detection step
+		});
+	</script>
+	<p>
+		Great! Now we've reached the target temperature and don't have any oscillations! There are two small problems though. First, there is a small overheat in the very beginning, as while we were heating up from 20 to 200 degrees, integral part kept adding up what led to overheat. Another problem is that our controller is slower than the very first relay one. We can solve both of them and get better once again.
+	</p>
 	<h3>PID-controller</h3>
-	<h3>Ramping</h3>
+	<p>
+		We already have proportional and integral parts in the controller, and it would make sense to add differential one. What it does is quite easy to understand — based on current and previous temperatures it predicts the temperature for the next point if we could heat at the same pace. So this prediction will help to compensate integral part and avoid overheating and at the same time we could tune parameters to larger values and make our controller faster.
+	</p>
+	<p>
+		You can probably guess how the output will look like:
+	</p>
+	<p>
+		$$ out = k_P \cdot (T_{set}-T) + k_I \cdot \int_{0}^{t} (T_{set}-T) dt - k_D \cdot \frac{dT}{dt}$$
+	</p>
+	<div id="pid-pid" class="pid"></div>
+	<script type="text/javascript">
+		PID({
+			element: "pid-pid",
+			tset: common.tset,
+			mode: "pid",
+			kp: 0.1,
+			ki: 0.007,
+			kd: 0.003,
+			system: Bulk({
+				q_in: common.q_in, // heat that we get from the heating tape
+				c_heat: common.c_heat, // heat capacitance of the heating region
+				c_det: common.c_det, // heat capacitance of the detection region
+				t_heat: common.t_room, // temperature of the heating region
+				t_det: common.t_room, // temperature of the detection region
+				kappa_int: common.kappa_int, // heat conductivity within a bulk
+				kappa_ext: common.kappa_ext, // heat conductivity to external bath
+				t_ext: common.t_room,	// external temperature
+				dt: common.dt, // simulating step
+				t_sample: common.t_sample, // sampling rate for the data array
+			}),
+			dt: 1/60, // time step
+			t: common.t, // detection step
+		});
+	</script>
+	<p>
+		Now it looks exactly like we want — it quickly reaches the exact value of the target temperature, without any oscillations or overheating .
+	</p>
 	<h2>Digital PID control</h2>
 	<h3>Limited output and Integral part</h3>
 	<h3>Digitalization</h3>
@@ -106,6 +225,8 @@ var common = {
 	<h2>Autotuning</h2>
 	<h3>Autotuning algorithms</h3>
 	<h3>Autotuning with noize</h3>
+
+	<h3>Ramping</h3>
 </div>
 
 

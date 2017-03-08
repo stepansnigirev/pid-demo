@@ -33,22 +33,29 @@ function Bulk(options){
 
 function PID(options){
 	var blk = options.system;
-	// var data_heat = [];
-	// var data_det = [];
 	var dt = options.dt;
 	var tset = options.tset;
 	var lastt = 0;
-	// var tstep = options.t/500;
+	var integral = 0;
+	var oldt = blk.t_det;
 	for (var t = 0; t < options.t; t+=dt) {
-		// if(t-lastt > tstep){
-		// 	lastt=t;
-		// 	data_heat.push([t,blk.t_heat]);
-		// 	data_det.push([t,blk.t_det]);
-		// }
+		var out = 0;
 		switch(options.mode){
 			case "relay":
 				out = (blk.t_det < tset) ? 1 : 0;
 				break
+			case "pid":
+				integral += options.ki * (tset - blk.t_det) * dt;
+				var diff = (blk.t_det - oldt) / dt;
+				out = options.kp * (tset - blk.t_det) + integral - options.kd * diff;
+				oldt = blk.t_det;
+				if(out > 1){
+					out = 1;
+				}
+				if(out < 0){
+					out = 0;
+				}
+				break;
 			default:
 				out = 0;
 		}
