@@ -5,6 +5,9 @@
 	<link rel="stylesheet" href="style.css">
 
 	<script src="highcharts.js"></script>
+	<script src="http://code.highcharts.com/modules/exporting.js"></script>
+	<script src="http://highcharts.github.io/export-csv/export-csv.js"></script>
+
 	<script src="pid.js"></script>
 
 	<script src='https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML'></script>
@@ -152,7 +155,7 @@ var common = {
 			tset: common.tset,
 			mode: "pid",
 			kp: 0.01,
-			ki: 0.008,
+			ki: 0.02,
 			kd: 0,
 			system: Bulk({
 				q_in: common.q_in, // heat that we get from the heating tape
@@ -190,7 +193,7 @@ var common = {
 			tset: common.tset,
 			mode: "pid",
 			kp: 0.1,
-			ki: 0.007,
+			ki: 0.02,
 			kd: 0.003,
 			system: Bulk({
 				q_in: common.q_in, // heat that we get from the heating tape
@@ -211,6 +214,264 @@ var common = {
 	<p>
 		Now it looks exactly like we want — it quickly reaches the exact value of the target temperature, without any oscillations or overheating .
 	</p>
+
+	<h2>Autotuning</h2>
+	<p>
+		To obtain a nicely working PID controller is not very simple. You have three parameters that you need to choose wisely — proportional, integral and differential gains. And if parameters are choosen badly you can end up with something like this:
+	</p>
+	<p class="label">
+		Large proportional gain, constant oscillations:
+	</p>
+	<div id="bigp-pid" class="pid"></div>
+	<script type="text/javascript">
+		PID({
+			element: "bigp-pid",
+			tset: common.tset,
+			mode: "pid",
+			kp: 1,
+			ki: 0.02,
+			kd: 0.003,
+			system: Bulk({
+				q_in: common.q_in, // heat that we get from the heating tape
+				c_heat: common.c_heat, // heat capacitance of the heating region
+				c_det: common.c_det, // heat capacitance of the detection region
+				t_heat: common.t_room, // temperature of the heating region
+				t_det: common.t_room, // temperature of the detection region
+				kappa_int: common.kappa_int, // heat conductivity within a bulk
+				kappa_ext: common.kappa_ext, // heat conductivity to external bath
+				t_ext: common.t_room,	// external temperature
+				dt: common.dt, // simulating step
+				t_sample: common.t_sample, // sampling rate for the data array
+			}),
+			dt: 1/60, // time step
+			t: common.t, // detection step
+		});
+	</script>
+	<p class="label">
+		Large integral gain, crazy overshoot and oscillations:
+	</p>
+	<div id="bigi-pid" class="pid"></div>
+	<script type="text/javascript">
+		PID({
+			element: "bigi-pid",
+			tset: common.tset,
+			mode: "pid",
+			kp: 0.1,
+			ki: 5,
+			kd: 0.003,
+			system: Bulk({
+				q_in: common.q_in, // heat that we get from the heating tape
+				c_heat: common.c_heat, // heat capacitance of the heating region
+				c_det: common.c_det, // heat capacitance of the detection region
+				t_heat: common.t_room, // temperature of the heating region
+				t_det: common.t_room, // temperature of the detection region
+				kappa_int: common.kappa_int, // heat conductivity within a bulk
+				kappa_ext: common.kappa_ext, // heat conductivity to external bath
+				t_ext: common.t_room,	// external temperature
+				dt: common.dt, // simulating step
+				t_sample: common.t_sample, // sampling rate for the data array
+			}),
+			dt: 1/60, // time step
+			t: common.t, // detection step
+		});
+	</script>
+	<p class="label">
+		Large differential gain, much slower and might cause oscillations:
+	</p>
+	<div id="bigd-pid" class="pid"></div>
+	<script type="text/javascript">
+		PID({
+			element: "bigd-pid",
+			tset: common.tset,
+			mode: "pid",
+			kp: 0.1,
+			ki: 0.02,
+			kd: 0.03,
+			system: Bulk({
+				q_in: common.q_in, // heat that we get from the heating tape
+				c_heat: common.c_heat, // heat capacitance of the heating region
+				c_det: common.c_det, // heat capacitance of the detection region
+				t_heat: common.t_room, // temperature of the heating region
+				t_det: common.t_room, // temperature of the detection region
+				kappa_int: common.kappa_int, // heat conductivity within a bulk
+				kappa_ext: common.kappa_ext, // heat conductivity to external bath
+				t_ext: common.t_room,	// external temperature
+				dt: common.dt, // simulating step
+				t_sample: common.t_sample, // sampling rate for the data array
+			}),
+			dt: 1/60, // time step
+			t: common.t, // detection step
+		});
+	</script>
+	<p>
+		Luckily there are ways to derive more or less optimal parameters for the PID controller by autotuning it. There are algorithms for that. To choose optimal parameters we first need to characterize our system somehow. For that we first need to set parameters somehow and then change the output from the settled value and see how the system responces to this change.
+	</p>
+	<h3>Step response</h3>
+	<p>
+		The simplest way is to wait while PID stabilizes, increase the output by a bit and wait while the system stabilizes on a new level:
+	</p>
+	<div id="step-pid" class="pid"></div>
+	<script type="text/javascript">
+		PID({
+			element: "step-pid",
+			mode: "step",
+			out_i: 0.27,
+			out_f: 0.3,
+			t_trans: common.t/4,
+			system: Bulk({
+				q_in: common.q_in, // heat that we get from the heating tape
+				c_heat: common.c_heat, // heat capacitance of the heating region
+				c_det: common.c_det, // heat capacitance of the detection region
+				t_heat: 208, // temperature of the heating region
+				t_det: 191, // temperature of the detection region
+				kappa_int: common.kappa_int, // heat conductivity within a bulk
+				kappa_ext: common.kappa_ext, // heat conductivity to external bath
+				t_ext: common.t_room,	// external temperature
+				dt: common.dt, // simulating step
+				t_sample: common.t_sample, // sampling rate for the data array
+			}),
+			dt: 1/60, // time step
+			t: 2 * common.t, // detection step
+		});
+	</script>
+	<p>
+		From the obtained data you can recalculate some values that characterize the system:
+	</p>
+	<figure>
+		<img src="img/step.svg"/>
+	</figure>
+	<p>
+		$$ t_1 = \frac{t_2 - t_3 \cdot ln(2)}{1 - ln(2)} $$
+		$$ \tau = t_3 - t_1 $$
+		$$ \tau_{del} = t_1 - t_0 $$
+		$$ K = \frac{B}{A} $$
+		$$ r = \frac{\tau_{del}}{\tau} $$
+	</p>
+	<p>
+		And finally get optimal parameters for the PID controller:
+	</p>
+
+	<table>
+		<tr>
+			<td></td>
+			<td class="gray">$$k_P$$</td>
+			<td class="gray">$$k_I$$</td>
+			<td class="gray">$$k_D$$</td>
+		</tr>
+		<tr>
+			<td class="gray">P</td>
+			<td>$$\frac{1}{r K}\left(1+\frac{r}{3}\right)$$</td>
+			<td></td>
+			<td></td>
+		</tr>
+		<tr>
+			<td class="gray">PI</td>
+			<td>$$\frac{1}{r K}\left(0.9+\frac{r}{12}\right)$$</td>
+			<td>$$k_p\cdot\frac{1}{\tau_{del}}\cdot\frac{9+20r}{30+3r}$$</td>
+			<td></td>
+		</tr>
+		<tr>
+			<td class="gray">PID</td>
+			<td>$$\frac{1}{r K}\left(\frac{4}{3}+\frac{r}{4}\right)$$</td>
+			<td>$$k_p\cdot\frac{1}{\tau_{del}}\cdot\frac{13+8r}{32+6r}$$</td>
+			<td>$$k_p\cdot\tau_{del}\cdot\frac{4}{11+2r}$$</td>
+		</tr>
+	</table>
+	<p>
+		Looks like magic, but it's not. It's just written for engeneers. What you actually have here is an exponential fit of a system responce and derivation of characteristic delay and derivative. You can read it in some control theory book or just think how would you do this — you will come up with similar expressions.
+	</p>
+	<p class="important">
+		In our case, when the output is limited and integral part is collected for quite a long time you need to be very careful with integral part realization in your PID. Read about that in "Limited output and Integral part" section.
+	</p>
+	<p>
+		Setting up this parameters for PID control will give us the following behaviour:
+	</p>
+	<p class="label">P-controller:</p>
+	<div id="step-p-pid" class="pid"></div>
+	<script type="text/javascript">
+		PID({
+			element: "step-p-pid",
+			tset: common.tset,
+			mode: "pid",
+			kp: 0.024,
+			ki: 0,
+			kd: 0,
+			system: Bulk({
+				q_in: common.q_in, // heat that we get from the heating tape
+				c_heat: common.c_heat, // heat capacitance of the heating region
+				c_det: common.c_det, // heat capacitance of the detection region
+				t_heat: common.t_room, // temperature of the heating region
+				t_det: common.t_room, // temperature of the detection region
+				kappa_int: common.kappa_int, // heat conductivity within a bulk
+				kappa_ext: common.kappa_ext, // heat conductivity to external bath
+				t_ext: common.t_room,	// external temperature
+				dt: common.dt, // simulating step
+				t_sample: common.t_sample, // sampling rate for the data array
+			}),
+			dt: 1/60, // time step
+			t: common.t, // detection step
+		});
+	</script>
+	<p class="label">PI-controller:</p>
+	<div id="step-pi-pid" class="pid"></div>
+	<script type="text/javascript">
+		PID({
+			element: "step-pi-pid",
+			tset: common.tset,
+			mode: "pid",
+			kp: 0.021,
+			ki: 0.021*5.2,
+			kd: 0,
+			system: Bulk({
+				q_in: common.q_in, // heat that we get from the heating tape
+				c_heat: common.c_heat, // heat capacitance of the heating region
+				c_det: common.c_det, // heat capacitance of the detection region
+				t_heat: common.t_room, // temperature of the heating region
+				t_det: common.t_room, // temperature of the detection region
+				kappa_int: common.kappa_int, // heat conductivity within a bulk
+				kappa_ext: common.kappa_ext, // heat conductivity to external bath
+				t_ext: common.t_room,	// external temperature
+				dt: common.dt, // simulating step
+				t_sample: common.t_sample, // sampling rate for the data array
+			}),
+			dt: 1/60, // time step
+			t: common.t, // detection step
+		});
+	</script>
+
+	<p class="label">PID-controller:</p>
+	<div id="step-pid-pid" class="pid"></div>
+	<script type="text/javascript">
+		PID({
+			element: "step-pid-pid",
+			tset: common.tset,
+			mode: "pid",
+			kp: 0.032,
+			ki: 0.032*6.4,
+			kd: 0.032*0.023,
+			system: Bulk({
+				q_in: common.q_in, // heat that we get from the heating tape
+				c_heat: common.c_heat, // heat capacitance of the heating region
+				c_det: common.c_det, // heat capacitance of the detection region
+				t_heat: common.t_room, // temperature of the heating region
+				t_det: common.t_room, // temperature of the detection region
+				kappa_int: common.kappa_int, // heat conductivity within a bulk
+				kappa_ext: common.kappa_ext, // heat conductivity to external bath
+				t_ext: common.t_room,	// external temperature
+				dt: common.dt, // simulating step
+				t_sample: common.t_sample, // sampling rate for the data array
+			}),
+			dt: 1/60, // time step
+			t: common.t, // detection step
+		});
+	</script>
+	<p>
+		I personally don't really like this technique, as during measurements of the step responce you are loosing control over temperature and if you change output too much, it may heat the system to higher temperature than you expect. In our case it was 20°C in couple minutes and this may be too much (for example for viewports). Fortunatelly, there is another way.
+	</p>
+	<h3>Relay method</h3>
+
+	<h2>Ramping</h2>
+
 	<h2>Digital PID control</h2>
 	<h3>Limited output and Integral part</h3>
 	<h3>Digitalization</h3>
@@ -222,11 +483,9 @@ var common = {
 
 	<h3>Noize and Differential part</h3>
 
-	<h2>Autotuning</h2>
 	<h3>Autotuning algorithms</h3>
 	<h3>Autotuning with noize</h3>
 
-	<h3>Ramping</h3>
 </div>
 
 

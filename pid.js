@@ -45,16 +45,21 @@ function PID(options){
 				out = (blk.t_det < tset) ? 1 : 0;
 				break
 			case "pid":
-				integral += options.ki * (tset - blk.t_det) * dt;
+				var int = integral + options.ki * (tset - blk.t_det) * dt;
 				var diff = (blk.t_det - oldt) / dt;
 				out = options.kp * (tset - blk.t_det) + integral - options.kd * diff;
 				oldt = blk.t_det;
 				if(out > 1){
 					out = 1;
+				}else{
+					integral = int;
 				}
 				if(out < 0){
 					out = 0;
 				}
+				break;
+			case "step":
+				out = (t < options.t_trans) ? options.out_i : options.out_f;
 				break;
 			default:
 				out = 0;
