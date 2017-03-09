@@ -4,11 +4,10 @@
 	<title>PID demo page</title>
 	<link rel="stylesheet" href="style.css">
 
-	<script src="highcharts.js"></script>
-	<script src="http://code.highcharts.com/modules/exporting.js"></script>
-	<script src="http://highcharts.github.io/export-csv/export-csv.js"></script>
-
-	<script src="pid.js"></script>
+	<script src="js/highcharts.js"></script>
+	<script src="js/exporting.js"></script>
+	<script src="js/export-csv.js"></script>
+	<script src="js/pid.js"></script>
 
 	<script src='https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML'></script>
 	<script type="text/x-mathjax-config">
@@ -16,6 +15,7 @@
 	  tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}
 	});
 	</script>
+
 </head>
 <body>
 <script type="text/javascript">
@@ -46,7 +46,9 @@ var common = {
 	<p>
 		The most simple thing that you can try is to heat if the temperature is below your setpoint and switch heating off if we are above the setpoint. Makes sence, but let's see how it will look like:
 	</p>
-	<div id="relay-pid" class="pid"></div>
+	<div id="relay-pid" class="pid">
+		<img src="img/chart1.svg"/>
+	</div>
 	<script type="text/javascript">
 		PID({
 			element: "relay-pid",
@@ -304,13 +306,13 @@ var common = {
 		});
 	</script>
 	<p>
-		Luckily there are ways to derive more or less optimal parameters for the PID controller by autotuning it. There are algorithms for that. To choose optimal parameters we first need to characterize our system somehow. For that we first need to set parameters somehow and then change the output from the settled value and see how the system responces to this change.
+		Luckily there are ways to derive more or less optimal parameters for the PID controller by autotuning it. There are algorithms for that. To choose optimal parameters we first need to characterize our system somehow. For that we first need to set parameters somehow and then change the output from the settled value and see how the system responces to this change. I am covering here only two of them, read textbooks if you want to know more.
 	</p>
 	<h3>Step response</h3>
 	<p>
-		The simplest way is to wait while PID stabilizes, increase the output by a bit and wait while the system stabilizes on a new level:
+		The simplest way is to wait while PID stabilizes, increase the output by a bit and wait while the system stabilizes on a new level.
 	</p>
-	<div id="step-pid" class="pid"></div>
+<!-- 	<div id="step-pid" class="pid"></div>
 	<script type="text/javascript">
 		PID({
 			element: "step-pid",
@@ -333,7 +335,7 @@ var common = {
 			dt: 1/60, // time step
 			t: 2 * common.t, // detection step
 		});
-	</script>
+	</script> -->
 	<p>
 		From the obtained data you can recalculate some values that characterize the system:
 	</p>
@@ -378,10 +380,13 @@ var common = {
 		</tr>
 	</table>
 	<p>
-		Looks like magic, but it's not. It's just written for engeneers. What you actually have here is an exponential fit of a system responce and derivation of characteristic delay and derivative. You can read it in some control theory book or just think how would you do this — you will come up with similar expressions.
+		Looks like magic, but it's not. It's just written for engeneers. What you actually have here is an exponential fit of a system responce and derivation of characteristic delay, amplitude and derivative. You can read about it in some control theory book or just think how would you do this — you will come up with similar expressions.
+	</p>
+	<p>
+		But if you want to implement autotuning in hardware, you probably don't want any complicated computations, so this "magic" values can be used right away.
 	</p>
 	<p class="important">
-		In our case, when the output is limited and integral part is collected for quite a long time you need to be very careful with integral part realization in your PID. Read about that in "Limited output and Integral part" section.
+		In our case, when the output is limited and integral part is collected for quite a long time, you need to be very careful with integral part realization in your PID. Read about that in "Limited output and Integral part" section.
 	</p>
 	<p>
 		Setting up this parameters for PID control will give us the following behaviour:
@@ -466,9 +471,159 @@ var common = {
 		});
 	</script>
 	<p>
-		I personally don't really like this technique, as during measurements of the step responce you are loosing control over temperature and if you change output too much, it may heat the system to higher temperature than you expect. In our case it was 20°C in couple minutes and this may be too much (for example for viewports). Fortunatelly, there is another way.
+		I personally don't like this technique, as during measurements of the step responce you are loosing control over temperature and if you change output too much, it may heat the system to higher temperature than you expect. In our case it was 20°C in couple minutes and this may be too much (for example for viewports). Fortunatelly, there is another way.
 	</p>
 	<h3>Relay method</h3>
+	<p>
+		A better way to figure out how our system behaves is to make it oscillate and then measure oscillation frequency and amplitude. We start again in a somehow obtained steady state mode near our point of interest. Then we choose a new setpoint slightly below current temperature and decrease output by some value $D$. When our system crosses the setpoint, we increase the output by $2 D$ and so on. Well, figures explain this kind of stuff better than words:
+	</p>
+<!-- 	<div id="autotune-pid" class="pid"></div>
+	<script type="text/javascript">
+		PID({
+			element: "autotune-pid",
+			mode: "autotune",
+			out: 0.27,
+			d: 0.1,
+			t_trans: common.t/4,
+			tset: 190,
+			system: Bulk({
+				q_in: common.q_in, // heat that we get from the heating tape
+				c_heat: common.c_heat, // heat capacitance of the heating region
+				c_det: common.c_det, // heat capacitance of the detection region
+				t_heat: 208, // temperature of the heating region
+				t_det: 191, // temperature of the detection region
+				kappa_int: common.kappa_int, // heat conductivity within a bulk
+				kappa_ext: common.kappa_ext, // heat conductivity to external bath
+				t_ext: common.t_room,	// external temperature
+				dt: common.dt, // simulating step
+				t_sample: common.t_sample, // sampling rate for the data array
+			}),
+			dt: 1/60, // time step
+			t: common.t, // detection step
+		});
+	</script> -->
+	<figure>
+		<img src="img/autotune.svg"/>
+	</figure>
+	<p>
+		From this data we can get optimal parameters for the PID (Tyreus-Luyben Method):
+	</p>
+	<p>
+		$$ k_U = \frac{4 D}{A \pi} $$
+	</p>
+	<table>
+		<tr>
+			<td></td>
+			<td class="gray">$$k_P$$</td>
+			<td class="gray">$$k_I$$</td>
+			<td class="gray">$$k_D$$</td>
+		</tr>
+		<tr>
+			<td class="gray">P</td>
+			<td>$$ 0.4 \cdot k_U$$</td>
+			<td></td>
+			<td></td>
+		</tr>
+		<tr>
+			<td class="gray">PI</td>
+			<td>$$ 0.3 \cdot k_U$$</td>
+			<td>$$ 0.14 \cdot k_U \Big/ P_U $$</td>
+			<td></td>
+		</tr>
+		<tr>
+			<td class="gray">PID</td>
+			<td>$$ 0.45 \cdot k_U$$</td>
+			<td>$$ 0.2 \cdot k_U \Big/ P_U $$</td>
+			<td>$$ 0.07 \cdot k_U \cdot P_U $$</td>
+		</tr>
+	</table>
+	<p>
+		And the results are:
+	</p>
+	<p class="label">P-controller:</p>
+	<div id="autotune-p-pid" class="pid"></div>
+	<script type="text/javascript">
+		var ku = 0.17;
+		var pu = 0.1;
+		PID({
+			element: "autotune-p-pid",
+			tset: common.tset,
+			mode: "pid",
+			kp: ku*0.4,
+			ki: 0,
+			kd: 0,
+			system: Bulk({
+				q_in: common.q_in, // heat that we get from the heating tape
+				c_heat: common.c_heat, // heat capacitance of the heating region
+				c_det: common.c_det, // heat capacitance of the detection region
+				t_heat: common.t_room, // temperature of the heating region
+				t_det: common.t_room, // temperature of the detection region
+				kappa_int: common.kappa_int, // heat conductivity within a bulk
+				kappa_ext: common.kappa_ext, // heat conductivity to external bath
+				t_ext: common.t_room,	// external temperature
+				dt: common.dt, // simulating step
+				t_sample: common.t_sample, // sampling rate for the data array
+			}),
+			dt: 1/60, // time step
+			t: common.t, // detection step
+		});
+	</script>
+	<p class="label">PI-controller:</p>
+	<div id="autotune-pi-pid" class="pid"></div>
+	<script type="text/javascript">
+		PID({
+			element: "autotune-pi-pid",
+			tset: common.tset,
+			mode: "pid",
+			kp: 0.3*ku,
+			ki: 0.14*ku/pu,
+			kd: 0,
+			system: Bulk({
+				q_in: common.q_in, // heat that we get from the heating tape
+				c_heat: common.c_heat, // heat capacitance of the heating region
+				c_det: common.c_det, // heat capacitance of the detection region
+				t_heat: common.t_room, // temperature of the heating region
+				t_det: common.t_room, // temperature of the detection region
+				kappa_int: common.kappa_int, // heat conductivity within a bulk
+				kappa_ext: common.kappa_ext, // heat conductivity to external bath
+				t_ext: common.t_room,	// external temperature
+				dt: common.dt, // simulating step
+				t_sample: common.t_sample, // sampling rate for the data array
+			}),
+			dt: 1/60, // time step
+			t: common.t, // detection step
+		});
+	</script>
+
+	<p class="label">PID-controller:</p>
+	<div id="autotune-pid-pid" class="pid"></div>
+	<script type="text/javascript">
+		PID({
+			element: "autotune-pid-pid",
+			tset: common.tset,
+			mode: "pid",
+			kp: 0.45*ku,
+			ki: 0.2*ku/pu,
+			kd: 0.07*ku*pu,
+			system: Bulk({
+				q_in: common.q_in, // heat that we get from the heating tape
+				c_heat: common.c_heat, // heat capacitance of the heating region
+				c_det: common.c_det, // heat capacitance of the detection region
+				t_heat: common.t_room, // temperature of the heating region
+				t_det: common.t_room, // temperature of the detection region
+				kappa_int: common.kappa_int, // heat conductivity within a bulk
+				kappa_ext: common.kappa_ext, // heat conductivity to external bath
+				t_ext: common.t_room,	// external temperature
+				dt: common.dt, // simulating step
+				t_sample: common.t_sample, // sampling rate for the data array
+			}),
+			dt: 1/60, // time step
+			t: common.t, // detection step
+		});
+	</script>
+	<p>
+		There are also other methods with other arbitrary coefficients to find the best PID parameters, if you want to find out more, read textbooks or wikipedia.
+	</p>
 
 	<h2>Ramping</h2>
 
