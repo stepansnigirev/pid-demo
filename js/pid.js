@@ -5,7 +5,7 @@ Highcharts.setOptions(Highcharts.theme);
 
 function Bulk(options){
 	var bulk = options;
-	bulk.heat_data = [[0, bulk.t_heat]];
+	// bulk.heat_data = [[0, bulk.t_heat]];
 	bulk.det_data = [[0, bulk.t_det]];
 	bulk._t = 0;
 	bulk._evaluate = function(dt, heat_rate){
@@ -16,9 +16,9 @@ function Bulk(options){
 		bulk.t_heat += (qh - qho - qhd) / bulk.c_heat;
 		bulk.t_det += (qhd - qdo) / bulk.c_det;
 		bulk._t += dt;
-		var lastt = bulk.heat_data[bulk.heat_data.length-1][0];
+		var lastt = bulk.det_data[bulk.det_data.length-1][0];
 		if(bulk._t - lastt >= bulk.t_sample){
-			bulk.heat_data.push([bulk._t, bulk.t_heat]);
+			// bulk.heat_data.push([bulk._t, bulk.t_heat]);
 			bulk.det_data.push([bulk._t, bulk.t_det]);
 		}
 	};
@@ -34,17 +34,43 @@ function Bulk(options){
 function PID(options){
 	var loaded = false;
 	// document.getElementById(options.element).addEventListener("click", function(event){
+	window.addEventListener("load", function(){
 		if(!loaded){
 			loaded = true;
 			var blk = options.system;
 			var dt = options.dt;
 			var tset = options.tset;
+
+			var ramp_mult = (options.tset > blk.t_det) ? 1 : -1;
+			if(options.ramp_speed && options.ramp_mode == "setpoint"){
+				tset = blk.t_det;
+			}
+
 			var lastt = 0;
 			var integral = 0;
 			var oldt = blk.t_det;
+			var mode = options.mode;
+
+			if(options.ramp_speed && (options.ramp_mode == "pi")){
+				mode = "ramp";
+			}
+			var tinit = blk.t_det;
+
 			for (var t = 0; t < options.t; t+=dt) {
+
+				if(options.ramp_speed && (options.ramp_mode == "setpoint") && (tset * ramp_mult < options.tset * ramp_mult)){
+					tset += options.ramp_speed * dt;
+					if(tset * ramp_mult > options.tset * ramp_mult){
+						tset = options.tset;
+					}
+				}
+				if(mode=="ramp" && (options.tset * ramp_mult <= blk.t_det * ramp_mult)){
+					mode = options.mode;
+				}
+
+
 				var out = 0;
-				switch(options.mode){
+				switch(mode){
 					case "relay":
 						out = (blk.t_det < tset) ? 1 : 0;
 						break
@@ -61,6 +87,32 @@ function PID(options){
 						if(out < 0){
 							out = 0;
 						}
+						break;
+					case "ramp":
+						var diff = (blk.t_det - oldt) / dt;
+						out = options.kp * (options.ramp_speed * t + tinit - blk.t_det) + options.kd * (options.ramp_speed - diff);
+						if(out > 1){
+							out = 1;
+						}
+						if(out < 0){
+							out = 0;
+						}
+						// comparing with pid
+						var curtset = options.ramp_speed * t + tinit;
+						// var int = integral + options.ki * (curtset - blk.t_det) * dt;
+						var diff = (blk.t_det - oldt) / dt;
+						out2 = options.kp * (tset - blk.t_det) - options.kd * diff;
+						if(out2 > 1){
+							out2 = 1;
+						}
+						if(out2 < 0){
+							out2 = 0;
+						}
+						if(out2 * ramp_mult < out * ramp_mult){
+							mode = options.mode;
+							console.log(blk.t_det, integral);
+						}
+						oldt = blk.t_det;
 						break;
 					case "step":
 						out = (t < options.t_trans) ? options.out_i : options.out_f;
@@ -111,15 +163,18 @@ function PID(options){
 			        }
 			    },
 
-			    series: [{
-			        name: 'Heating region',
-			        data: blk.heat_data
-			    },{
+			    series: [
+			    // {
+			    //     name: 'Heating region',
+			    //     data: blk.heat_data
+			    // },
+			    {
 			        name: 'Detection region',
 			        data: blk.det_data
-			    }]
+			    }
+			    ]
 
 			});
 		}
-  	// }, false);
+  	}, false);
 }

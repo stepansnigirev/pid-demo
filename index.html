@@ -46,9 +46,7 @@ var common = {
 	<p>
 		The most simple thing that you can try is to heat if the temperature is below your setpoint and switch heating off if we are above the setpoint. Makes sence, but let's see how it will look like:
 	</p>
-	<div id="relay-pid" class="pid">
-		<img src="img/chart1.svg"/>
-	</div>
+	<div id="relay-pid" class="pid"></div>
 	<script type="text/javascript">
 		PID({
 			element: "relay-pid",
@@ -71,7 +69,7 @@ var common = {
 		});
 	</script>
 	<p>
-		You see that there is a huge overheat in the beginning and some oscillations in the temperature that damping with time. In this model we could switch the relay very fast, but in reality switching is limited by the physical implementation of the relay. Taking into account that we can switch with some time resolution, we will end up with this:
+		Looks not so bad, you see that there is slight overheat in the beginning and some oscillations in the temperature that damping with time. But in this particular model we assumed instant relay and detection speeds, but in reality there are some timescales, especially for a relay. Taking into account that we can switch with a limited time resolution, we will end up with this:
 	</p>
 	<div id="relay-pid2" class="pid">
 	</div>
@@ -626,6 +624,84 @@ var common = {
 	</p>
 
 	<h2>Ramping</h2>
+	<p>
+		One usefull option for a PID controller is linear ramp of the setpoint. In case of heating it is very clear — some of the parts can't handle high temperature gradients. For example viewports can survive only if you are heating them slower than 2°C/min. So let's make it ramp.
+	</p>
+	<p>
+		The simplest way that could work in most cases is first to set setpoint to current temperature value and start increasing/decreasing it with time according to the ramp speed. Here how it would work:
+	</p>
+	<div id="ramp-setpoint-pid" class="pid"></div>
+	<script type="text/javascript">
+		PID({
+			element: "ramp-setpoint-pid",
+			tset: common.tset,
+			mode: "pid",
+			kp: 0.45*ku,
+			ki: 0.2*ku/pu,
+			kd: 0.07*ku*pu,
+			ramp_speed: 150,
+			ramp_mode: "setpoint",
+			system: Bulk({
+				q_in: common.q_in, // heat that we get from the heating tape
+				c_heat: common.c_heat, // heat capacitance of the heating region
+				c_det: common.c_det, // heat capacitance of the detection region
+				t_heat: common.t_room, // temperature of the heating region
+				t_det: common.t_room, // temperature of the detection region
+				kappa_int: common.kappa_int, // heat conductivity within a bulk
+				kappa_ext: common.kappa_ext, // heat conductivity to external bath
+				t_ext: common.t_room,	// external temperature
+				dt: common.dt, // simulating step
+				t_sample: common.t_sample, // sampling rate for the data array
+			}),
+			dt: 1/60, // time step
+			t: common.t, // detection step
+		});
+	</script>
+	<p>
+		There are two not so nice features of this scheme though. The first one is that when system reaches it's final setpoint, it overshoots slightly more than usually. It is due to integral component of the controller that keeps adding up error signal during the whole ramping process. A second feature is that in the very beginning, when we just started ramping, the system has some delay in reaction and later compensates for it. So in the very beginning of the ramp we first have slightly smaller ramp speed and then slightly larger.
+	</p>
+	<p>
+		A logical way to compensate for it is to make a PID controller for the ramping speed. But we already have a PID controller. Are we going to controll PID controller with another PID controller? Sounds a bit overcomplicated.
+	</p>
+	<p>
+		Well, if we decide that PI controller will be good enough for this, we can just tune our PID algorithm a bit to work like a PID controller for the ramp. Basically, PD controller for temperature is almost the same as PI controller for ramping speed with ramping speed setpoint equal to 0. Modified version of our controller will look like this:
+	</p>
+	<p>
+		$$ out = k_{RI} \cdot \int_{0}^{t} (\upsilon_{ramp} - \frac{dT}{dt}) dt + k_{RP} \cdot (\upsilon_{ramp} - \frac{dT}{dt}) = k_{RI} \cdot (\upsilon_{ramp} \cdot t - T) + k_{RP} \cdot (\upsilon_{ramp}-\frac{dT}{dt})
+		$$
+	</p>
+	<div id="ramp-pi-pid" class="pid"></div>
+	<script type="text/javascript">
+		PID({
+			element: "ramp-pi-pid",
+			tset: common.tset,
+			mode: "pid",
+			kp: 0.45*ku,
+			ki: 0.2*ku/pu,
+			kd: 0.07*ku*pu,
+			ramp_speed: 150,
+			ramp_mode: "pi",
+			// ri: 0.45*ku,
+			// rp: 0.07*ku*pu,
+			system: Bulk({
+				q_in: common.q_in, // heat that we get from the heating tape
+				c_heat: common.c_heat, // heat capacitance of the heating region
+				c_det: common.c_det, // heat capacitance of the detection region
+				t_heat: common.t_room, // temperature of the heating region
+				t_det: common.t_room, // temperature of the detection region
+				kappa_int: common.kappa_int, // heat conductivity within a bulk
+				kappa_ext: common.kappa_ext, // heat conductivity to external bath
+				t_ext: common.t_room,	// external temperature
+				dt: common.dt, // simulating step
+				t_sample: common.t_sample, // sampling rate for the data array
+			}),
+			dt: 1/60, // time step
+			t: common.t, // detection step
+		});
+	</script>
+	<p>
+		Comparing to the previous result it looks smoother and doesn't overheat.
+	</p>
 
 	<h2>Digital PID control</h2>
 	<h3>Limited output and Integral part</h3>
