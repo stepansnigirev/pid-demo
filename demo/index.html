@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>PID demo page</title>
+	<meta charset="utf-8">
+	<link rel="stylesheet" href="style.css">
+
+	<script src="../js/highcharts.js"></script>
+	<script src="../js/exporting.js"></script>
+	<script src="../js/export-csv.js"></script>
+	<script src="../js/pid.js"></script>
+	<script src="../js/vue.js"></script>
+</head>
+<body>
+<div id="app">
+	<nav>
+		<label for="phase">
+			<span>Phase:</span>
+			<input type="range" id="phase" v-model.number="ph" min="0" max="1" step="0.01">
+		</label>
+		<label for="amp">
+			<span>Amplitude:</span>
+			<input type="range" id="amp" v-model.number="amp" min="0" max="1" step="0.01">
+		</label>
+		<label for="freq">
+			<span>Frequency:</span>
+			<input type="range" id="freq" v-model.number="freq" min="0" max="10" step="0.01">
+		</label>
+		<div>
+			{{ amp }} * Sin( {{freq}} t + {{ ph }} ) = {{ val }}
+		</div>
+	</nav>
+	<main id="chart">
+	</main>
+</div>
+<script src="app.js"></script>
+</body>
+</html>

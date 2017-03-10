@@ -71,7 +71,7 @@ function isVisible(element) {
 }
 
 function plot(element, series=[{name: "Sample chart", data: [1,3,2,4,5]}], callback=null){
-	Highcharts.chart(element, {
+	return Highcharts.chart(element, {
 		chart: {
             zoomType: 'x'
         },
@@ -91,7 +91,7 @@ function plot(element, series=[{name: "Sample chart", data: [1,3,2,4,5]}], callb
 		        return this.x.toFixed(2) + '<br>' +
 		        	'<b style="color: '+this.point.color + '; font-weight: bold;">' +
 		        	this.series.name + '</b>: <b>' +
-		        	this.y.toFixed(2) + '</b> °C';
+		        	this.y.toFixed(2) + '</b> °C';
 		    }
 	    },
 		title: "",
