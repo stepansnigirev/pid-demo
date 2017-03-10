@@ -21,16 +21,32 @@
 <script type="text/javascript">
 var common = {
 	tset: 200,
-	q_in: 4000,
+	q_in: 10000,
 	c_heat: 3,
 	c_det: 3,
 	t_room: 20,
 	kappa_int: 30,
 	kappa_ext: 3,
 	dt: 0.000001,
-	t: 2,
-	t_sample: 0.001,
+	t: 1,
+	t_sample: 0.003,
 }
+var system = {
+	q_in: common.q_in, // heat that we get from the heating tape
+	c_heat: common.c_heat, // heat capacitance of the heating region
+	c_det: common.c_det, // heat capacitance of the detection region
+	t_heat: common.t_room, // temperature of the heating region
+	t_det: common.t_room, // temperature of the detection region
+	kappa_int: common.kappa_int, // heat conductivity within a bulk
+	kappa_ext: common.kappa_ext, // heat conductivity to external bath
+	t_ext: common.t_room,	// external temperature
+	dt: common.dt, // simulating step
+	t_sample: common.t_sample, // sampling rate for the data array
+}
+var system2 = Object.assign({}, system, {
+	q_in: 40000,
+});
+
 </script>
 
 <div class="container">
@@ -48,22 +64,11 @@ var common = {
 	</p>
 	<div id="relay-pid" class="pid"></div>
 	<script type="text/javascript">
-		PID({
+		doMagic({
 			element: "relay-pid",
 			tset: common.tset,
 			mode: "relay",
-			system: Bulk({
-				q_in: common.q_in, // heat that we get from the heating tape
-				c_heat: common.c_heat, // heat capacitance of the heating region
-				c_det: common.c_det, // heat capacitance of the detection region
-				t_heat: common.t_room, // temperature of the heating region
-				t_det: common.t_room, // temperature of the detection region
-				kappa_int: common.kappa_int, // heat conductivity within a bulk
-				kappa_ext: common.kappa_ext, // heat conductivity to external bath
-				t_ext: common.t_room,	// external temperature
-				dt: common.dt, // simulating step
-				t_sample: common.t_sample, // sampling rate for the data array
-			}),
+			system: Bulk(system),
 			dt: common.dt, // time step
 			t: common.t, // detection step
 		});
@@ -74,22 +79,11 @@ var common = {
 	<div id="relay-pid2" class="pid">
 	</div>
 	<script type="text/javascript">
-		PID({
+		doMagic({
 			element: "relay-pid2",
 			tset: common.tset,
 			mode: "relay",
-			system: Bulk({
-				q_in: common.q_in, // heat that we get from the heating tape
-				c_heat: common.c_heat, // heat capacitance of the heating region
-				c_det: common.c_det, // heat capacitance of the detection region
-				t_heat: common.t_room, // temperature of the heating region
-				t_det: common.t_room, // temperature of the detection region
-				kappa_int: common.kappa_int, // heat conductivity within a bulk
-				kappa_ext: common.kappa_ext, // heat conductivity to external bath
-				t_ext: common.t_room,	// external temperature
-				dt: common.dt, // simulating step
-				t_sample: common.t_sample, // sampling rate for the data array
-			}),
+			system: Bulk(system),
 			dt: 1/60, // time step
 			t: common.t, // detection step
 		});
@@ -109,25 +103,14 @@ var common = {
 	</p>
 	<div id="p-pid" class="pid"></div>
 	<script type="text/javascript">
-		PID({
+		doMagic({
 			element: "p-pid",
 			tset: common.tset,
 			mode: "pid",
-			kp: 0.01,
+			kp: 7e-3,
 			ki: 0,
 			kd: 0,
-			system: Bulk({
-				q_in: common.q_in, // heat that we get from the heating tape
-				c_heat: common.c_heat, // heat capacitance of the heating region
-				c_det: common.c_det, // heat capacitance of the detection region
-				t_heat: common.t_room, // temperature of the heating region
-				t_det: common.t_room, // temperature of the detection region
-				kappa_int: common.kappa_int, // heat conductivity within a bulk
-				kappa_ext: common.kappa_ext, // heat conductivity to external bath
-				t_ext: common.t_room,	// external temperature
-				dt: common.dt, // simulating step
-				t_sample: common.t_sample, // sampling rate for the data array
-			}),
+			system: Bulk(system),
 			dt: 1/60, // time step
 			t: common.t, // detection step
 		});
@@ -150,25 +133,14 @@ var common = {
 	</p>
 	<div id="pi-pid" class="pid"></div>
 	<script type="text/javascript">
-		PID({
+		doMagic({
 			element: "pi-pid",
 			tset: common.tset,
 			mode: "pid",
-			kp: 0.01,
-			ki: 0.02,
+			kp: 7e-3,
+			ki: 7e-3,
 			kd: 0,
-			system: Bulk({
-				q_in: common.q_in, // heat that we get from the heating tape
-				c_heat: common.c_heat, // heat capacitance of the heating region
-				c_det: common.c_det, // heat capacitance of the detection region
-				t_heat: common.t_room, // temperature of the heating region
-				t_det: common.t_room, // temperature of the detection region
-				kappa_int: common.kappa_int, // heat conductivity within a bulk
-				kappa_ext: common.kappa_ext, // heat conductivity to external bath
-				t_ext: common.t_room,	// external temperature
-				dt: common.dt, // simulating step
-				t_sample: common.t_sample, // sampling rate for the data array
-			}),
+			system: Bulk(system),
 			dt: 1/60, // time step
 			t: common.t, // detection step
 		});
@@ -188,119 +160,106 @@ var common = {
 	</p>
 	<div id="pid-pid" class="pid"></div>
 	<script type="text/javascript">
-		PID({
+		doMagic({
 			element: "pid-pid",
 			tset: common.tset,
 			mode: "pid",
-			kp: 0.1,
-			ki: 0.02,
-			kd: 0.003,
-			system: Bulk({
-				q_in: common.q_in, // heat that we get from the heating tape
-				c_heat: common.c_heat, // heat capacitance of the heating region
-				c_det: common.c_det, // heat capacitance of the detection region
-				t_heat: common.t_room, // temperature of the heating region
-				t_det: common.t_room, // temperature of the detection region
-				kappa_int: common.kappa_int, // heat conductivity within a bulk
-				kappa_ext: common.kappa_ext, // heat conductivity to external bath
-				t_ext: common.t_room,	// external temperature
-				dt: common.dt, // simulating step
-				t_sample: common.t_sample, // sampling rate for the data array
-			}),
+			kp: 4e-2,
+			ki: 7e-2,
+			kd: 1e-3,
+			system: Bulk(system),
 			dt: 1/60, // time step
 			t: common.t, // detection step
 		});
 	</script>
 	<p>
-		Now it looks exactly like we want — it quickly reaches the exact value of the target temperature, without any oscillations or overheating .
+		Now it looks exactly like we want — it quickly reaches the exact value of the target temperature, without any oscillations or overheating. Summing up, here how all three controllers look like:
 	</p>
+	<div id="all-pid" class="pid"></div>
+	<script type="text/javascript">
+		doMagic({
+			element: "all-pid",
+			pids: [
+				{
+					kp: 7e-3,
+					ki: 0,
+					kd: 0,
+					system: Bulk(system),
+					label: "P",
+				},
+				{
+					kp: 7e-3,
+					ki: 7e-3,
+					kd: 0,
+					system: Bulk(system),
+					label: "PI",
+				},
+				{
+					kp: 4e-2,
+					ki: 7e-2,
+					kd: 1e-3,
+					system: Bulk(system),
+					label: "PID",
+				},
+			],
+			common: {
+				tset: common.tset,
+				mode: "pid",
+				dt: 1/60, // time step
+				t: common.t, // detection step
+			}
+		});
+	</script>
+
 
 	<h2>Autotuning</h2>
 	<p>
 		To obtain a nicely working PID controller is not very simple. You have three parameters that you need to choose wisely — proportional, integral and differential gains. And if parameters are choosen badly you can end up with something like this:
 	</p>
-	<p class="label">
-		Large proportional gain, constant oscillations:
-	</p>
-	<div id="bigp-pid" class="pid"></div>
+	<div id="large-pid" class="pid"></div>
 	<script type="text/javascript">
-		PID({
-			element: "bigp-pid",
-			tset: common.tset,
-			mode: "pid",
-			kp: 1,
-			ki: 0.02,
-			kd: 0.003,
-			system: Bulk({
-				q_in: common.q_in, // heat that we get from the heating tape
-				c_heat: common.c_heat, // heat capacitance of the heating region
-				c_det: common.c_det, // heat capacitance of the detection region
-				t_heat: common.t_room, // temperature of the heating region
-				t_det: common.t_room, // temperature of the detection region
-				kappa_int: common.kappa_int, // heat conductivity within a bulk
-				kappa_ext: common.kappa_ext, // heat conductivity to external bath
-				t_ext: common.t_room,	// external temperature
-				dt: common.dt, // simulating step
-				t_sample: common.t_sample, // sampling rate for the data array
-			}),
-			dt: 1/60, // time step
-			t: common.t, // detection step
-		});
-	</script>
-	<p class="label">
-		Large integral gain, crazy overshoot and oscillations:
-	</p>
-	<div id="bigi-pid" class="pid"></div>
-	<script type="text/javascript">
-		PID({
-			element: "bigi-pid",
-			tset: common.tset,
-			mode: "pid",
-			kp: 0.1,
-			ki: 5,
-			kd: 0.003,
-			system: Bulk({
-				q_in: common.q_in, // heat that we get from the heating tape
-				c_heat: common.c_heat, // heat capacitance of the heating region
-				c_det: common.c_det, // heat capacitance of the detection region
-				t_heat: common.t_room, // temperature of the heating region
-				t_det: common.t_room, // temperature of the detection region
-				kappa_int: common.kappa_int, // heat conductivity within a bulk
-				kappa_ext: common.kappa_ext, // heat conductivity to external bath
-				t_ext: common.t_room,	// external temperature
-				dt: common.dt, // simulating step
-				t_sample: common.t_sample, // sampling rate for the data array
-			}),
-			dt: 1/60, // time step
-			t: common.t, // detection step
-		});
-	</script>
-	<p class="label">
-		Large differential gain, much slower and might cause oscillations:
-	</p>
-	<div id="bigd-pid" class="pid"></div>
-	<script type="text/javascript">
-		PID({
-			element: "bigd-pid",
-			tset: common.tset,
-			mode: "pid",
-			kp: 0.1,
-			ki: 0.02,
-			kd: 0.03,
-			system: Bulk({
-				q_in: common.q_in, // heat that we get from the heating tape
-				c_heat: common.c_heat, // heat capacitance of the heating region
-				c_det: common.c_det, // heat capacitance of the detection region
-				t_heat: common.t_room, // temperature of the heating region
-				t_det: common.t_room, // temperature of the detection region
-				kappa_int: common.kappa_int, // heat conductivity within a bulk
-				kappa_ext: common.kappa_ext, // heat conductivity to external bath
-				t_ext: common.t_room,	// external temperature
-				dt: common.dt, // simulating step
-				t_sample: common.t_sample, // sampling rate for the data array
-			}),
-			dt: 1/60, // time step
-			t: common.t, // detection step
+		doMagic({
+			element: "large-pid",
+			pids: [
+				{
+					kp: 4e-1,
+					ki: 7e-2,
+					kd: 1e-3,
+					system: Bulk(system),
+					label: "Large P",
+				},
+				{
+					kp: 4e-2,
+					ki: 1,
+					kd: 1e-3,
+					system: Bulk(system),
+					label: "Large I",
+				},
+				{
+					kp: 4e-2,
+					ki: 7e-2,
+					kd: 1e-2,
+					system: Bulk(system),
+					label: "Large D",
+				},
+				{
+					kp: 4e-2,
+					ki: 7e-2,
+					kd: 1e-3,
+					system: Bulk(system),
+					label: "Normal PID",
+					chart: {
+						dashStyle: 'shortdot',
+						color: "#777",
+					}
+				},
+			],
+			common: {
+				tset: common.tset,
+				mode: "pid",
+				dt: 1/60, // time step
+				t: common.t, // detection step
+			}
 		});
 	</script>
 	<p>
@@ -312,7 +271,7 @@ var common = {
 	</p>
 <!-- 	<div id="step-pid" class="pid"></div>
 	<script type="text/javascript">
-		PID({
+		doMagic({
 			element: "step-pid",
 			mode: "step",
 			out_i: 0.27,
@@ -389,83 +348,39 @@ var common = {
 	<p>
 		Setting up this parameters for PID control will give us the following behaviour:
 	</p>
-	<p class="label">P-controller:</p>
-	<div id="step-p-pid" class="pid"></div>
+	<div id="step-pid" class="pid"></div>
 	<script type="text/javascript">
-		PID({
-			element: "step-p-pid",
-			tset: common.tset,
-			mode: "pid",
-			kp: 0.024,
-			ki: 0,
-			kd: 0,
-			system: Bulk({
-				q_in: common.q_in, // heat that we get from the heating tape
-				c_heat: common.c_heat, // heat capacitance of the heating region
-				c_det: common.c_det, // heat capacitance of the detection region
-				t_heat: common.t_room, // temperature of the heating region
-				t_det: common.t_room, // temperature of the detection region
-				kappa_int: common.kappa_int, // heat conductivity within a bulk
-				kappa_ext: common.kappa_ext, // heat conductivity to external bath
-				t_ext: common.t_room,	// external temperature
-				dt: common.dt, // simulating step
-				t_sample: common.t_sample, // sampling rate for the data array
-			}),
-			dt: 1/60, // time step
-			t: common.t, // detection step
-		});
-	</script>
-	<p class="label">PI-controller:</p>
-	<div id="step-pi-pid" class="pid"></div>
-	<script type="text/javascript">
-		PID({
-			element: "step-pi-pid",
-			tset: common.tset,
-			mode: "pid",
-			kp: 0.021,
-			ki: 0.021*5.2,
-			kd: 0,
-			system: Bulk({
-				q_in: common.q_in, // heat that we get from the heating tape
-				c_heat: common.c_heat, // heat capacitance of the heating region
-				c_det: common.c_det, // heat capacitance of the detection region
-				t_heat: common.t_room, // temperature of the heating region
-				t_det: common.t_room, // temperature of the detection region
-				kappa_int: common.kappa_int, // heat conductivity within a bulk
-				kappa_ext: common.kappa_ext, // heat conductivity to external bath
-				t_ext: common.t_room,	// external temperature
-				dt: common.dt, // simulating step
-				t_sample: common.t_sample, // sampling rate for the data array
-			}),
-			dt: 1/60, // time step
-			t: common.t, // detection step
-		});
-	</script>
-
-	<p class="label">PID-controller:</p>
-	<div id="step-pid-pid" class="pid"></div>
-	<script type="text/javascript">
-		PID({
-			element: "step-pid-pid",
-			tset: common.tset,
-			mode: "pid",
-			kp: 0.032,
-			ki: 0.032*6.4,
-			kd: 0.032*0.023,
-			system: Bulk({
-				q_in: common.q_in, // heat that we get from the heating tape
-				c_heat: common.c_heat, // heat capacitance of the heating region
-				c_det: common.c_det, // heat capacitance of the detection region
-				t_heat: common.t_room, // temperature of the heating region
-				t_det: common.t_room, // temperature of the detection region
-				kappa_int: common.kappa_int, // heat conductivity within a bulk
-				kappa_ext: common.kappa_ext, // heat conductivity to external bath
-				t_ext: common.t_room,	// external temperature
-				dt: common.dt, // simulating step
-				t_sample: common.t_sample, // sampling rate for the data array
-			}),
-			dt: 1/60, // time step
-			t: common.t, // detection step
+		doMagic({
+			element: "step-pid",
+			pids: [
+				{
+					kp: 0.024,
+					ki: 0,
+					kd: 0,
+					system: Bulk(system),
+					label: "P",
+				},
+				{
+					kp: 0.021,
+					ki: 0.021*5.2,
+					kd: 0,
+					system: Bulk(system),
+					label: "PI",
+				},
+				{
+					kp: 0.032,
+					ki: 0.032*6.4,
+					kd: 0.032*0.023,
+					system: Bulk(system),
+					label: "PID",
+				},
+			],
+			common: {
+				tset: common.tset,
+				mode: "pid",
+				dt: 1/60, // time step
+				t: common.t, // detection step
+			}
 		});
 	</script>
 	<p>
@@ -477,7 +392,7 @@ var common = {
 	</p>
 <!-- 	<div id="autotune-pid" class="pid"></div>
 	<script type="text/javascript">
-		PID({
+		doMagic({
 			element: "autotune-pid",
 			mode: "autotune",
 			out: 0.27,
@@ -538,85 +453,41 @@ var common = {
 	<p>
 		And the results are:
 	</p>
-	<p class="label">P-controller:</p>
-	<div id="autotune-p-pid" class="pid"></div>
+	<div id="autotune-pid" class="pid"></div>
 	<script type="text/javascript">
 		var ku = 0.17;
 		var pu = 0.1;
-		PID({
-			element: "autotune-p-pid",
-			tset: common.tset,
-			mode: "pid",
-			kp: ku*0.4,
-			ki: 0,
-			kd: 0,
-			system: Bulk({
-				q_in: common.q_in, // heat that we get from the heating tape
-				c_heat: common.c_heat, // heat capacitance of the heating region
-				c_det: common.c_det, // heat capacitance of the detection region
-				t_heat: common.t_room, // temperature of the heating region
-				t_det: common.t_room, // temperature of the detection region
-				kappa_int: common.kappa_int, // heat conductivity within a bulk
-				kappa_ext: common.kappa_ext, // heat conductivity to external bath
-				t_ext: common.t_room,	// external temperature
-				dt: common.dt, // simulating step
-				t_sample: common.t_sample, // sampling rate for the data array
-			}),
-			dt: 1/60, // time step
-			t: common.t, // detection step
-		});
-	</script>
-	<p class="label">PI-controller:</p>
-	<div id="autotune-pi-pid" class="pid"></div>
-	<script type="text/javascript">
-		PID({
-			element: "autotune-pi-pid",
-			tset: common.tset,
-			mode: "pid",
-			kp: 0.3*ku,
-			ki: 0.14*ku/pu,
-			kd: 0,
-			system: Bulk({
-				q_in: common.q_in, // heat that we get from the heating tape
-				c_heat: common.c_heat, // heat capacitance of the heating region
-				c_det: common.c_det, // heat capacitance of the detection region
-				t_heat: common.t_room, // temperature of the heating region
-				t_det: common.t_room, // temperature of the detection region
-				kappa_int: common.kappa_int, // heat conductivity within a bulk
-				kappa_ext: common.kappa_ext, // heat conductivity to external bath
-				t_ext: common.t_room,	// external temperature
-				dt: common.dt, // simulating step
-				t_sample: common.t_sample, // sampling rate for the data array
-			}),
-			dt: 1/60, // time step
-			t: common.t, // detection step
-		});
-	</script>
-
-	<p class="label">PID-controller:</p>
-	<div id="autotune-pid-pid" class="pid"></div>
-	<script type="text/javascript">
-		PID({
-			element: "autotune-pid-pid",
-			tset: common.tset,
-			mode: "pid",
-			kp: 0.45*ku,
-			ki: 0.2*ku/pu,
-			kd: 0.07*ku*pu,
-			system: Bulk({
-				q_in: common.q_in, // heat that we get from the heating tape
-				c_heat: common.c_heat, // heat capacitance of the heating region
-				c_det: common.c_det, // heat capacitance of the detection region
-				t_heat: common.t_room, // temperature of the heating region
-				t_det: common.t_room, // temperature of the detection region
-				kappa_int: common.kappa_int, // heat conductivity within a bulk
-				kappa_ext: common.kappa_ext, // heat conductivity to external bath
-				t_ext: common.t_room,	// external temperature
-				dt: common.dt, // simulating step
-				t_sample: common.t_sample, // sampling rate for the data array
-			}),
-			dt: 1/60, // time step
-			t: common.t, // detection step
+		doMagic({
+			element: "autotune-pid",
+			pids: [
+				{
+					kp: ku*0.4,
+					ki: 0,
+					kd: 0,
+					system: Bulk(system),
+					label: "P",
+				},
+				{
+					kp: 0.3*ku,
+					ki: 0.14*ku/pu,
+					kd: 0,
+					system: Bulk(system),
+					label: "PI",
+				},
+				{
+					kp: 0.45*ku,
+					ki: 0.2*ku/pu,
+					kd: 0.07*ku*pu,
+					system: Bulk(system),
+					label: "PID",
+				},
+			],
+			common: {
+				tset: common.tset,
+				mode: "pid",
+				dt: 1/60, // time step
+				t: common.t, // detection step
+			}
 		});
 	</script>
 	<p>
@@ -632,7 +503,7 @@ var common = {
 	</p>
 	<div id="ramp-setpoint-pid" class="pid"></div>
 	<script type="text/javascript">
-		PID({
+		doMagic({
 			element: "ramp-setpoint-pid",
 			tset: common.tset,
 			mode: "pid",
@@ -641,18 +512,7 @@ var common = {
 			kd: 0.07*ku*pu,
 			ramp_speed: 150,
 			ramp_mode: "setpoint",
-			system: Bulk({
-				q_in: common.q_in, // heat that we get from the heating tape
-				c_heat: common.c_heat, // heat capacitance of the heating region
-				c_det: common.c_det, // heat capacitance of the detection region
-				t_heat: common.t_room, // temperature of the heating region
-				t_det: common.t_room, // temperature of the detection region
-				kappa_int: common.kappa_int, // heat conductivity within a bulk
-				kappa_ext: common.kappa_ext, // heat conductivity to external bath
-				t_ext: common.t_room,	// external temperature
-				dt: common.dt, // simulating step
-				t_sample: common.t_sample, // sampling rate for the data array
-			}),
+			system: Bulk(system),
 			dt: 1/60, // time step
 			t: common.t, // detection step
 		});
@@ -670,41 +530,96 @@ var common = {
 		$$ out = k_{RI} \cdot \int_{0}^{t} (\upsilon_{ramp} - \frac{dT}{dt}) dt + k_{RP} \cdot (\upsilon_{ramp} - \frac{dT}{dt}) = k_{RI} \cdot (\upsilon_{ramp} \cdot t - T) + k_{RP} \cdot (\upsilon_{ramp}-\frac{dT}{dt})
 		$$
 	</p>
-	<div id="ramp-pi-pid" class="pid"></div>
+	<div id="smart-ramp-pid" class="pid"></div>
 	<script type="text/javascript">
-		PID({
-			element: "ramp-pi-pid",
-			tset: common.tset,
-			mode: "pid",
-			kp: 0.45*ku,
-			ki: 0.2*ku/pu,
-			kd: 0.07*ku*pu,
-			ramp_speed: 150,
-			ramp_mode: "pi",
-			// ri: 0.45*ku,
-			// rp: 0.07*ku*pu,
-			system: Bulk({
-				q_in: common.q_in, // heat that we get from the heating tape
-				c_heat: common.c_heat, // heat capacitance of the heating region
-				c_det: common.c_det, // heat capacitance of the detection region
-				t_heat: common.t_room, // temperature of the heating region
-				t_det: common.t_room, // temperature of the detection region
-				kappa_int: common.kappa_int, // heat conductivity within a bulk
-				kappa_ext: common.kappa_ext, // heat conductivity to external bath
-				t_ext: common.t_room,	// external temperature
-				dt: common.dt, // simulating step
-				t_sample: common.t_sample, // sampling rate for the data array
-			}),
-			dt: 1/60, // time step
-			t: common.t, // detection step
+		var ku = 0.17;
+		var pu = 0.1;
+		doMagic({
+			element: "smart-ramp-pid",
+			pids: [
+				{
+					ramp_mode: "pi",
+					label: "PI ramp",
+					system: Bulk(system),
+					chart: {
+						color: colors.blue,
+					}
+				},
+				{
+					ramp_mode: "setpoint",
+					label: "Setpoint ramp",
+					system: Bulk(system),
+					chart: {
+						color: colors.red,
+					}
+				},
+			],
+			common: {
+				tset: common.tset,
+				mode: "pid",
+				kp: 0.45*ku,
+				ki: 0.2*ku/pu,
+				kd: 0.07*ku*pu,
+				ramp_speed: 150,
+				dt: 1/60, // time step
+				t: common.t, // detection step
+			}
 		});
 	</script>
 	<p>
 		Comparing to the previous result it looks smoother and doesn't overheat.
 	</p>
+	<p>
+		Now, when it is clear how PID controllers work in theory, we can move on to the digital part, where I will tell why straitforward theoretical PID controller often doesn't work and what to do to make it work.
+	</p>
 
 	<h2>Digital PID control</h2>
-	<h3>Limited output and Integral part</h3>
+	<p>
+		Unfortunatelly we live not in an ideal world. And on top of a very simple and beautiful concept of the PID controller lies a bunch of real problems, starting from speed limitation that we discussed in the very beginning to noize and other annoying stuff.
+	</p>
+	<p>
+		In case of purely analog PID controller it is quite hard to implement any fancy logic and features. In the opposite, digital microcontrollers allow to add features just with a few lines of code.
+	</p>
+	<h3>Integral part issues</h3>
+	<p>
+		First thing to mention is that our output is limited. As we can only switch the relay on and off, even with PWM output we are limited to the output values from 0 to 1. This means that in the very beginning when we are trying to reach the setpoint as fast as we can, we can't go as fast as our controller wants. Because of that, controller collects much larger integral part than it should.
+	</p>
+	<p>
+		We can actually solve this problem fairly easy. If we see that our output is out of the possible range [0,1] we just stop changing the integral sum. Compare the effect of this tiny fix:
+	</p>
+	<div id="integral-fix-pid" class="pid"></div>
+	<script type="text/javascript">
+		doMagic({
+			element: "integral-fix-pid",
+			pids: [
+				{
+					system: Bulk(system),
+					label: "With integral fix",
+					chart: {
+						color: colors.blue,
+					}
+				},
+				{
+					system: Bulk(system),
+					nolimit: true,
+					label: "Bare PID controller",
+					chart: {
+						color: colors.red,
+					}
+				}
+			],
+			common: {
+				tset: common.tset,
+				mode: "pid",
+				kp: 0.45*ku,
+				ki: 0.2*ku/pu,
+				kd: 0.07*ku*pu,
+				dt: 1/60, // time step
+				t: common.t, // detection step
+			}
+		});
+	</script>
+
 	<h3>Digitalization</h3>
 
 	<h3>Filtering the data</h3>
