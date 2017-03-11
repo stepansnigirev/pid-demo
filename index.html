@@ -514,7 +514,7 @@ var system2 = Object.assign({}, system, {
 			ramp_mode: "setpoint",
 			system: Bulk(system),
 			dt: 1/60, // time step
-			t: common.t, // detection step
+			t: 2*common.t, // detection step
 		});
 	</script>
 	<p>
@@ -562,7 +562,7 @@ var system2 = Object.assign({}, system, {
 				kd: 0.07*ku*pu,
 				ramp_speed: 150,
 				dt: 1/60, // time step
-				t: common.t, // detection step
+				t: 2* common.t, // detection step
 			}
 		});
 	</script>

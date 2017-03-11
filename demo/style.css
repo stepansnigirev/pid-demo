@@ -34,3 +34,18 @@ nav label{
 main{
     flex-grow: 1;
 }
+
+input[type="number"]{
+    width: 100px;
+    flex-grow: 0;
+    text-align: center;
+}
+
+nav h1{
+    font-size: 24px;
+    font-weight: 300;
+    margin: 0;
+    margin-bottom: 5px;
+    padding: 0;
+    text-align: center;
+}

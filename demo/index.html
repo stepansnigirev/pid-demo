@@ -14,21 +14,25 @@
 <body>
 <div id="app">
 	<nav>
-		<label for="phase">
-			<span>Phase:</span>
-			<input type="range" id="phase" v-model.number="ph" min="0" max="1" step="0.01">
+		<h1>Presets</h1>
+		<!-- <h1>System settings</h1> -->
+		<h1>PID settings</h1>
+		<label for="tset">
+			<span>T<sub>set</sub></span>
+			<input type="number" id="tset" v-model.number="pid.tset" @change="change">
 		</label>
-		<label for="amp">
-			<span>Amplitude:</span>
-			<input type="range" id="amp" v-model.number="amp" min="0" max="1" step="0.01">
+		<label for="kp">
+			<span>k<sub>P</sub></span>
+			<input type="number" id="kp" v-model.number="pid.kp" @change="change">
 		</label>
-		<label for="freq">
-			<span>Frequency:</span>
-			<input type="range" id="freq" v-model.number="freq" min="0" max="10" step="0.01">
+		<label for="ki">
+			<span>k<sub>I</sub></span>
+			<input type="number" id="ki" v-model.number="pid.ki" @change="change">
 		</label>
-		<div>
-			{{ amp }} * Sin( {{freq}} t + {{ ph }} ) = {{ val }}
-		</div>
+		<label for="kd">
+			<span>k<sub>D</sub></span>
+			<input type="number" id="kd" v-model.number="pid.kd" @change="change">
+		</label>
 	</nav>
 	<main id="chart">
 	</main>
