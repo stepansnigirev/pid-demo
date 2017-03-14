@@ -38,6 +38,47 @@ function doMagic(options){
 				        name: options.label || "Measured temperature",
 				        data: data.t_det
 				    });
+				    if(options.mode == "step"){
+				    	console.log("step here");
+				    	var d = data.t_det;
+				    	var tset = options.tset;
+				    	var b = d[d.length-1][1] - tset;
+				    	var t2 = null;
+				    	var t3 = null;
+				    	for (var i = 0; i < d.length; i++) {
+				    		if( (d[i][1] > tset + 0.5*b) && (t2==null) ){
+				    			t2 = d[i][0];
+				    		}
+				    		if( (d[i][1] > tset + 0.632*b) && (t3==null) ){
+				    			t3 = d[i][0];
+				    		}
+				    	}
+				    	var t0 = options.t_trans;
+				    	var r = {
+				    		b: b,
+				    		t0: t0,
+				    		t2: t2,
+				    		t3: t3
+				    	};
+				    	r.t1 = (r.t2-r.t3*Math.log(2))/(1-Math.log(2));
+				    	r.tau = r.t3 - r.t1;
+				    	r.tdel = r.t1 - r.t0;
+				    	r.k = b/options.dout;
+				    	r.r = r.tdel / r.tau;
+				    	console.log(r);
+				    	console.log("Just P:");
+				    	var kp = (1/r.r/r.k)*(1+r.r/3);
+				    	console.log(kp);
+				    	console.log("PI:");
+				    	kp = (1/r.r/r.k)*(0.9+r.r/12);
+				    	var ki = kp * (1/r.tdel) * (9+20*r.r)/(30+3*r.r);
+				    	console.log(kp,ki);
+				    	console.log("PID:");
+				    	kp = (1/r.r/r.k)*(4/3+r.r/4);
+				    	ki = kp * (1/r.tdel) * (13+8*r.r)/(32+6*r.r);
+				    	var kd = kp * r.tdel * 4/(11+2*r.r);
+				    	console.log(kp,ki,kd);
+				    }
 				}
 			    setTimeout(function(){
 				    plot(element, series);
@@ -136,13 +177,22 @@ function Bulk(options){
 			bulk._evaluate(delta, heat_rate);
 		}
 	};
+	bulk.getSteadyState = function(tset){
+		var d = {
+			t_heat: tset+bulk.kappa_ext * (tset - bulk.t_ext) / bulk.kappa_int,
+			t_det: tset,
+			out: 0
+		}
+		d.out = (bulk.kappa_ext * (d.t_heat - bulk.t_ext) + bulk.kappa_int * (d.t_heat - tset))/bulk.q_in;
+		return d;
+	};
 	return bulk;
 }
 
 function PID(opt){
 	var options = Object.assign({
-		umin: -1,
-		umax: 1,
+		umin: -10,
+		umax: 10,
 	}, opt);
 	var blk = options.system;
 	var dt = options.dt;
@@ -163,6 +213,13 @@ function PID(opt){
 	}
 	var tinit = blk.t_det;
 	// var out_arr = [];
+	if(mode == "step"){
+		var d = blk.getSteadyState(options.tset);
+		blk.t_det = d.t_det;
+		blk.t_heat = d.t_heat;
+		options.out_i = d.out;
+		options.out_f = d.out + options.dout;
+	}
 
 	return function(){
 		for (var t = 0; t < options.t; t+=dt) {
@@ -176,7 +233,6 @@ function PID(opt){
 			if(mode=="ramp" && (options.tset * ramp_mult <= blk.t_det * ramp_mult)){
 				mode = options.mode;
 			}
-
 
 			var out = 0;
 			switch(mode){

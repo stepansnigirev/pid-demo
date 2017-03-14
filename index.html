@@ -269,13 +269,15 @@ var system2 = Object.assign({}, system, {
 	<p>
 		The simplest way is to wait while PID stabilizes, increase the output by a bit and wait while the system stabilizes on a new level.
 	</p>
-<!-- 	<div id="step-pid" class="pid"></div>
+	<div id="step-tune-pid" class="pid"></div>
 	<script type="text/javascript">
 		doMagic({
-			element: "step-pid",
+			element: "step-tune-pid",
 			mode: "step",
-			out_i: 0.27,
-			out_f: 0.3,
+			tset: 200,
+			dout: 0.1,
+			// out_i: 0.27,
+			// out_f: 0.3,
 			t_trans: common.t/4,
 			system: Bulk({
 				q_in: common.q_in, // heat that we get from the heating tape
@@ -290,9 +292,9 @@ var system2 = Object.assign({}, system, {
 				t_sample: common.t_sample, // sampling rate for the data array
 			}),
 			dt: 1/60, // time step
-			t: 2 * common.t, // detection step
+			t: 10 * common.t, // detection step
 		});
-	</script> -->
+	</script>
 	<p>
 		From the obtained data you can recalculate some values that characterize the system:
 	</p>
@@ -354,23 +356,23 @@ var system2 = Object.assign({}, system, {
 			element: "step-pid",
 			pids: [
 				{
-					kp: 0.024,
+					kp: 0.009,
 					ki: 0,
 					kd: 0,
 					system: Bulk(system),
 					label: "P",
 				},
 				{
-					kp: 0.021,
-					ki: 0.021*5.2,
+					kp: 0.008,
+					ki: 0.04,
 					kd: 0,
 					system: Bulk(system),
 					label: "PI",
 				},
 				{
-					kp: 0.032,
-					ki: 0.032*6.4,
-					kd: 0.032*0.023,
+					kp: 0.012,
+					ki: 0.073,
+					kd: 0.0003,
 					system: Bulk(system),
 					label: "PID",
 				},
