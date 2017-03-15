@@ -28,7 +28,7 @@ function doMagic(options){
 						var data = pid();
 						series.push(Object.assign({
 					        name: opts.label || "Measured temperature",
-					        data: data.t_det,
+					        data: data.t_det.splice(1),
 					    }, opts.chart || {}));
 					}
 				}else{
@@ -36,7 +36,7 @@ function doMagic(options){
 					var data = pid();
 					series.push({
 				        name: options.label || "Measured temperature",
-				        data: data.t_det
+				        data: data.t_det.splice(1)
 				    });
 				    if(options.mode == "step"){
 				    	console.log("step here");
@@ -213,12 +213,17 @@ function PID(opt){
 	}
 	var tinit = blk.t_det;
 	// var out_arr = [];
-	if(mode == "step"){
+	if(mode == "step" || mode == "autotune"){
 		var d = blk.getSteadyState(options.tset);
 		blk.t_det = d.t_det;
 		blk.t_heat = d.t_heat;
-		options.out_i = d.out;
-		options.out_f = d.out + options.dout;
+		if(mode == "step"){
+			options.out_i = d.out;
+			options.out_f = d.out + options.dout;
+		}else{
+			options.out = d.out;
+			tset = options.tset - options.dtset;
+		}
 	}
 
 	return function(){

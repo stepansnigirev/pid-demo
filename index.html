@@ -392,15 +392,15 @@ var system2 = Object.assign({}, system, {
 	<p>
 		A better way to figure out how our system behaves is to make it oscillate and then measure oscillation frequency and amplitude. We start again in a somehow obtained steady state mode near our point of interest. Then we choose a new setpoint slightly below current temperature and decrease output by some value $D$. When our system crosses the setpoint, we increase the output by $2 D$ and so on. Well, figures explain this kind of stuff better than words:
 	</p>
-<!-- 	<div id="autotune-pid" class="pid"></div>
+	<div id="autotune-tune-pid" class="pid"></div>
 	<script type="text/javascript">
 		doMagic({
-			element: "autotune-pid",
+			element: "autotune-tune-pid",
 			mode: "autotune",
-			out: 0.27,
 			d: 0.1,
 			t_trans: common.t/4,
-			tset: 190,
+			tset: 200,
+			dtset: 2,
 			system: Bulk({
 				q_in: common.q_in, // heat that we get from the heating tape
 				c_heat: common.c_heat, // heat capacitance of the heating region
@@ -414,9 +414,9 @@ var system2 = Object.assign({}, system, {
 				t_sample: common.t_sample, // sampling rate for the data array
 			}),
 			dt: 1/60, // time step
-			t: common.t, // detection step
+			t: 3*common.t, // detection step
 		});
-	</script> -->
+	</script>
 	<figure>
 		<img src="img/autotune.svg"/>
 	</figure>
