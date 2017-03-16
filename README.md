@@ -12,7 +12,7 @@ Now the funny part: system could be anything - it can be a simulation of a heati
 
 ## Writeup
 
--Ideal PID controller
+- Ideal PID controller
 	- Basics of PID control: what P, I and D do and what happens if they are wrong or missing
 	- Autotuning algorithms. Step responce, Relay method.
 	- Ramping. How to ramp smart.
