@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Digital feedback controllers</title>
+	<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div id="app">
+	<div class="title" v-if="slide>0">
+		{{slides[slide].title}}
+	</div>
+
+	<div class="dark slide" v-if="slide==0">
+		<div class="title">
+			<div>{{slides[slide].title}}
+				<div class="subtitle">
+					with Arduino, or not
+				</div>
+			</div>
+		</div>
+		<div class="footnote">
+			Stepan Snigirev
+		</div>
+	</div>
+
+	<div class="slide" v-if="slide==1" id="examples">
+		<figure v-bind:style="{ opacity: (step > 0) ? 1 : 0 }">
+			<img src="img/car.png">
+			<figcaption>Car cruise control</figcaption>
+		</figure>
+		<figure v-bind:style="{ opacity: (step > 1) ? 1 : 0 }">
+			<img src="img/laser.png">
+			<figcaption>Laser lock</figcaption>
+		</figure>
+		<figure v-bind:style="{ opacity: (step > 2) ? 1 : 0 }">
+			<img src="img/dragon.png">
+			<figcaption>Temperature control</figcaption>
+		</figure>
+		<figure v-bind:style="{ opacity: (step > 3) ? 1 : 0 }">
+			<img src="img/frige.png">
+			<figcaption>Flying fridge</figcaption>
+		</figure>
+	</div>
+
+	<div class="slide" v-if="slide==2" id="toymodel">
+		<figure class="dragon-container">
+			<img class="dragon" src="img/dragon_base.png">
+			<img class="knight" src="img/knight.png">
+			<img class="fire" src="img/fire.png" v-bind:style="{ opacity: curslide.heating ? 1 : 0 }">
+			<img class="ice" src="img/fire.png" v-bind:style="{ opacity: curslide.heating ? 0 : 1 }">
+		</figure>
+	</div>
+
+	<div class="slide" v-if="slide==3" id="relay">
+		<figure class="dragon-container small">
+			<img class="dragon" src="img/dragon_base.png">
+			<img class="knight" src="img/knight.png">
+			<img class="fire" src="img/fire.png" v-bind:style="{ opacity: curslide.heating ? 1 : 0 }">
+			<img class="ice" src="img/fire.png" v-bind:style="{ opacity: curslide.heating ? 0 : 1 }">
+		</figure>
+	</div>
+
+	<div class="slide" v-if="slide==slides.length-1" id="thanks">
+		<h1>Thanks!</h1>
+<!-- 		<figure class="dragon-container">
+			<img class="dragon" src="img/dragon_base.png">
+			<img class="knight" src="img/knight.png">
+			<img class="fire" src="img/fire.png">
+		</figure>
+ -->	</div>
+
+	<div id="slidenum">
+		<div id="slider" v-bind:style="{ width: (100*slide/(slides.length-1)) + '%' }"></div>
+	</div>
+</div>
+<script src="../js/vue.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
