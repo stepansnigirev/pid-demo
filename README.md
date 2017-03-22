@@ -20,3 +20,7 @@ Now the funny part: system could be anything - it can be a simulation of a heati
 	- Working with limitations in output
 	- Noisy measurements: filtering the data (Kalman filter)
 	- Autotuning with noize
+
+## Talk
+
+The [talk](talk) folder contains my slides from Ringberg group retreat.
