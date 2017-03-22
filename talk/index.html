@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
+	<meta charset="utf-8">
 	<title>Digital feedback controllers</title>
 	<link rel="stylesheet" href="styles.css">
 </head>
@@ -11,6 +12,7 @@
 	</div>
 
 	<div class="dark slide" v-if="slide==0">
+		<img src="img/hero.svg" width="600px" style="position: relative; left: 50%; margin-left: -300px; top:30px;" />
 		<div class="title">
 			<div>{{slides[slide].title}}
 				<div class="subtitle">
@@ -51,29 +53,146 @@
 		</figure>
 	</div>
 
-	<div class="slide" v-if="slide==3" id="relay">
-		<figure class="dragon-container small">
-			<img class="dragon" src="img/dragon_base.png">
-			<img class="knight" src="img/knight.png">
-			<img class="fire" src="img/fire.png" v-bind:style="{ opacity: curslide.heating ? 1 : 0 }">
-			<img class="ice" src="img/fire.png" v-bind:style="{ opacity: curslide.heating ? 0 : 1 }">
-		</figure>
+	<div class="slide chart" v-if="slide==3">
+		<div id="relay-pid" class="chart-container"></div>
+	</div>
+
+	<div class="slide chart" v-if="slide==4">
+		<div id="relay-pid2" class="chart-container"></div>
+	</div>
+
+	<div class="slide chart" v-if="slide==5">
+		<img src="img/p-eq.png">
+		<div id="p-pid" class="chart-container"></div>
+	</div>
+
+	<div class="slide chart" v-if="slide==6">
+		<img src="img/pi-eq.png">
+		<div id="pi-pid" class="chart-container"></div>
+	</div>
+
+	<div class="slide chart" v-if="slide==7">
+		<img src="img/pid-eq.png">
+		<div id="pid-pid" class="chart-container"></div>
+	</div>
+
+	<div class="slide chart" v-if="slide==8">
+		<div id="all-pid" class="chart-container"></div>
+	</div>
+
+	<div class="slide chart" v-if="slide==9">
+		<div id="large-pid" class="chart-container"></div>
+	</div>
+
+	<div class="slide chart" v-if="slide==10">
+		<div id="classic-autotune" class="chart-container"></div>
+	</div>
+
+	<div class="slide center" v-if="slide==11">
+		<img src="img/pidparams.png"/>
+	</div>
+
+	<div class="slide fullimage" v-if="slide==12">
+		<img src="../img/step.svg"/>
+	</div>
+
+	<div class="slide" v-if="slide==13">
+		<div style="margin: 20px auto; width: 830px;">
+			<img src="../img/step.svg" width="450px" style="margin: 0 20px 0 50px;"/>
+			<img src="img/step-eq.png"/>
+			<img src="img/step-table.png"/>
+		</div>
+	</div>
+
+	<div class="slide fullimage" v-if="slide==14">
+		<img src="../img/autotune.svg"/>
+	</div>
+
+	<div class="slide" v-if="slide==15">
+		<div style="margin: 20px auto; width: 830px;">
+			<img src="../img/autotune.svg" width="500px" style="margin: 0 20px 0 50px;"/>
+			<img src="img/autotune-eq.png"/>
+			<img src="img/autotune-table.png"/>
+		</div>
+	</div>
+
+	<div class="slide chart" v-if="slide==16">
+		<div id="ramp-setpoint-pid" class="chart-container"></div>
+	</div>
+
+	<div class="slide chart" v-if="slide==17">
+		<div id="smart-ramp-pid" class="chart-container"></div>
+	</div>
+
+	<div class="slide chart" v-if="slide==18">
+		<div id="integral-problem-pid" class="chart-container"></div>
+	</div>
+
+	<div class="slide chart" v-if="slide==19">
+		<div id="integral-fix-pid" class="chart-container"></div>
+	</div>
+
+	<div class="slide chart" v-if="slide==20">
+		<div id="d-noize" class="chart-container"></div>
+	</div>
+
+	<div class="slide chart" v-if="slide==21">
+		<div id="autotune-noize" class="chart-container"></div>
+	</div>
+
+	<div class="slide chart" v-if="slide==22">
+		<div id="filters-plot" class="chart-container"></div>
+	</div>
+
+	<div class="slide chart" v-if="slide==23">
+		<div id="exp-filter-plot" class="chart-container"></div>
+	</div>
+
+	<div class="slide fullimage" v-if="slide==24">
+		<img src="../img/step.svg"/>
+	</div>
+
+	<div class="slide chart" v-if="slide==25">
+		<div id="kalman-filter-plot" class="chart-container"></div>
+	</div>
+
+	<div class="slide all-center" v-if="slide==26">
+		<br><br><br>
+		<h1>Can you do it with Arduino?</h1>
+		<h2>Yes, if a few ms delay is fine.</h2>
+		<p>PID library: <a href="http://playground.arduino.cc/Code/PIDLibrary">http://playground.arduino.cc/Code/PIDLibrary</a></p>
+		<p>Autotune library: <a href="http://playground.arduino.cc/Code/PIDAutotuneLibrary">http://playground.arduino.cc/Code/PIDAutotuneLibrary</a></p>
 	</div>
 
 	<div class="slide" v-if="slide==slides.length-1" id="thanks">
 		<h1>Thanks!</h1>
-<!-- 		<figure class="dragon-container">
+		<figure class="dragon-container">
 			<img class="dragon" src="img/dragon_base.png">
 			<img class="knight" src="img/knight.png">
 			<img class="fire" src="img/fire.png">
 		</figure>
- -->	</div>
+ 	</div>
 
 	<div id="slidenum">
+		<span style="width: 100%; text-align: left; display: block;">{{timeleft}}</span>
 		<div id="slider" v-bind:style="{ width: (100*slide/(slides.length-1)) + '%' }"></div>
 	</div>
 </div>
+
+<script src="../js/d3.v4.min.js"></script>
+<script src="../js/highcharts.js"></script>
+<!-- <script src="../js/exporting.js"></script> -->
+<!-- <script src="../js/export-csv.js"></script> -->
 <script src="../js/vue.js"></script>
+<script src="../js/pid.js"></script>
 <script src="app.js"></script>
+
+<!-- <script src='../js/mathjax/MathJax.js?config=TeX-AMS-MML_HTMLorMML'></script>
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}
+});
+</script>
+ -->
 </body>
 </html>

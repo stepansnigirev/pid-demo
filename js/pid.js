@@ -18,7 +18,7 @@ function doMagic(options){
 		var element = options.element;
 		var loaded = false;
 		var doPlot = function(){
-			if(!loaded && isVisible(element)){
+			if(!loaded){
 				loaded=true;
 				var series = [];
 				if(options.pids){
@@ -85,8 +85,9 @@ function doMagic(options){
 			    },0);
 			}
 		}
-		window.addEventListener("load", doPlot, false);
-		window.addEventListener("scroll", doPlot);
+		// window.addEventListener("load", doPlot, false);
+		// window.addEventListener("scroll", doPlot);
+		doPlot();
 	})()
 }
 
@@ -139,7 +140,9 @@ function plot(element, series=[{name: "Sample chart", data: [1,3,2,4,5]}], callb
 	    yAxis: {
 		        title: {
 		            text: 'Temperature (°C)'
-		        }
+		        },
+		        gridLineColor: '#aaa',
+		        gridLineWidth: 1,
 		},
 	    xAxis: {
 	        title: {
@@ -157,7 +160,10 @@ function Bulk(options){
 	bulk.heat_data = [[0, bulk.t_heat]];
 	bulk.det_data = [[0, bulk.t_det]];
 	bulk._t = 0;
+	bulk.offset = 0;
 	bulk._evaluate = function(dt, heat_rate){
+		bulk.t_det -= bulk.offset;
+		bulk.offset = options.noize * (Math.random() + Math.random() + Math.random() + Math.random() + Math.random() - 2.5)/5;
 		var qhd = bulk.kappa_int * (bulk.t_heat - bulk.t_det) * dt;
 		var qho = bulk.kappa_ext * (bulk.t_heat - bulk.t_ext) * dt;
 		var qdo = bulk.kappa_ext * (bulk.t_det - bulk.t_ext) * dt;
@@ -166,9 +172,10 @@ function Bulk(options){
 		bulk.t_det += (qhd - qdo) / bulk.c_det;
 		bulk._t += dt;
 		var lastt = bulk.det_data[bulk.det_data.length-1][0];
+		bulk.t_det += bulk.offset;
 		if(bulk._t - lastt >= bulk.t_sample){
 			bulk.heat_data.push([bulk._t, bulk.t_heat]);
-			bulk.det_data.push([bulk._t, bulk.t_det]);
+			bulk.det_data.push([bulk._t, bulk.t_det + bulk.offset]);
 		}
 	};
 	bulk.evaluate = function(dt, heat_rate){
@@ -225,6 +232,7 @@ function PID(opt){
 			tset = options.tset - options.dtset;
 		}
 	}
+	var falling = true;
 
 	return function(){
 		for (var t = 0; t < options.t; t+=dt) {
@@ -294,7 +302,13 @@ function PID(opt){
 					if(t < options.t_trans){
 						out = options.out;
 					}else{
-						out = (blk.t_det < tset) ? options.out+options.d : options.out-options.d;
+						if(falling){
+							out = (blk.t_det < tset) ? options.out+options.d : options.out-options.d;
+							falling = (blk.t_det > tset);
+						}else{
+							out = (blk.t_det < tset + 2 * options.dtset) ? options.out+options.d : options.out-options.d;
+							falling = (blk.t_det > tset + 2 * options.dtset);
+						}
 					}
 					break;
 				default:

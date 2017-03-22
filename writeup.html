@@ -435,21 +435,33 @@ var system2 = Object.assign({}, system, {
 		</tr>
 		<tr>
 			<td class="gray">P</td>
-			<td>$$ 0.4 \cdot k_U$$</td>
+			<td>$$ 0.5 \cdot k_U$$</td>
 			<td></td>
 			<td></td>
 		</tr>
 		<tr>
 			<td class="gray">PI</td>
-			<td>$$ 0.3 \cdot k_U$$</td>
-			<td>$$ 0.14 \cdot k_U \Big/ P_U $$</td>
+			<td>$$ 0.45 \cdot k_U$$</td>
+			<td>$$ 0.54 \cdot k_U \Big/ P_U $$</td>
 			<td></td>
 		</tr>
 		<tr>
 			<td class="gray">PID</td>
-			<td>$$ 0.45 \cdot k_U$$</td>
-			<td>$$ 0.2 \cdot k_U \Big/ P_U $$</td>
-			<td>$$ 0.07 \cdot k_U \cdot P_U $$</td>
+			<td>$$ 0.6 \cdot k_U$$</td>
+			<td>$$ 1.2 \cdot k_U \Big/ P_U $$</td>
+			<td>$$ 0.075 \cdot k_U \cdot P_U $$</td>
+		</tr>
+		<tr>
+			<td class="gray">Some overshoot</td>
+			<td>$$ 0.33 \cdot k_U$$</td>
+			<td>$$ 0.66 \cdot k_U \Big/ P_U $$</td>
+			<td>$$ 0.11 \cdot k_U \cdot P_U $$</td>
+		</tr>
+		<tr>
+			<td class="gray">No overshoot</td>
+			<td>$$ 0.2 \cdot k_U$$</td>
+			<td>$$ 0.4 \cdot k_U \Big/ P_U $$</td>
+			<td>$$ 0.067 \cdot k_U \cdot P_U $$</td>
 		</tr>
 	</table>
 	<p>
