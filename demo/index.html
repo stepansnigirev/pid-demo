@@ -21,6 +21,35 @@
 			<span>Time interval</sub></span>
 			<input type="number" id="time" v-model.number="pid.t" @change="change">
 		</label>
+		<label for="t_sample">
+			<span>Plot sampling</span>
+			<input type="number" id="t_sample" v-model.number="system.t_sample" @change="change">
+		</label>
+		<h1>Model settings</h1>
+		<label for="q_in">
+			<span>Heat rate</span>
+			<input type="number" id="q_in" v-model.number="system.q_in" @change="change">
+		</label>
+		<label for="c_heat">
+			<span>Heat capacity 1</span>
+			<input type="number" id="c_heat" v-model.number="system.c_heat" @change="change">
+		</label>
+		<label for="c_det">
+			<span>Heat capacity 2</span>
+			<input type="number" id="c_det" v-model.number="system.c_det" @change="change">
+		</label>
+		<label for="kappa_int">
+			<span>Heat conductance internal</span>
+			<input type="number" id="kappa_int" v-model.number="system.kappa_int" @change="change">
+		</label>
+		<label for="kappa_ext">
+			<span>Heat conductance external</span>
+			<input type="number" id="kappa_ext" v-model.number="system.kappa_ext" @change="change">
+		</label>
+		<label for="dt">
+			<span>Simulation step</span>
+			<input type="number" id="dt" v-model.number="system.dt" @change="change">
+		</label>
 		<h1>PID settings</h1>
 		<label for="tset">
 			<span>T<sub>set</sub></span>
@@ -37,6 +66,14 @@
 		<label for="kd">
 			<span>k<sub>D</sub></span>
 			<input type="number" id="kd" v-model.number="pid.kd" @change="change">
+		</label>
+		<label for="umin">
+			<span>Minimum output</span>
+			<input type="number" id="umin" v-model.number="pid.umin" @change="change">
+		</label>
+		<label for="umax">
+			<span>Maximum output</span>
+			<input type="number" id="umax" v-model.number="pid.umax" @change="change">
 		</label>
 	</nav>
 	<main id="chart">

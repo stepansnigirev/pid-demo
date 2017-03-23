@@ -20,7 +20,7 @@ html, body{
     height: 100%;
 }
 nav{
-    width: 300px;
+    width: 400px;
     border-right: 1px solid #eee;
     padding: 20px;
 }
@@ -29,6 +29,7 @@ nav label{
     flex-direction: row;
     align-content: center;
     justify-content: space-between;
+    padding: 3px;
 }
 
 main{

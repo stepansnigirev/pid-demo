@@ -22,7 +22,7 @@ var app = new Vue({
 			mode: "pid",
 			kp: 54,
 			ki: 160,
-			kd: 0.24,
+			kd: 6,
 
 			// dt: 1e-6, // relay time step
 			dt: 1e-3, // relay time step
