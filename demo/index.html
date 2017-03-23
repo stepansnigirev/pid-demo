@@ -50,6 +50,10 @@
 			<span>Simulation step</span>
 			<input type="number" id="dt" v-model.number="system.dt" @change="change">
 		</label>
+		<label for="dt2">
+			<span>PID minimum step</span>
+			<input type="number" id="dt2" v-model.number="pid.dt" @change="change">
+		</label>
 		<h1>PID settings</h1>
 		<label for="tset">
 			<span>T<sub>set</sub></span>
