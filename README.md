@@ -44,7 +44,7 @@ As we are working in the ideal case, we will imagine that we are not just a simp
 
 The most simple thing that you can try is to heat if the temperature is below 200°C and cool if we are above the setpoint. Makes sence, but let's see how it will look like:
 
-![Relay controller](img/relay1.svg)
+![Relay controller](https://raw.githubusercontent.com/stepansnigirev/pid-demo/master/img/relay1.svg)
 
 Looks not so bad, at the end we are actually at 200°C. But in the very beginning there is a huge overheat and some oscillations in the temperature that damping with time. After such way of cooking our knight will be probably fried and not very tasty.
 
