@@ -1,12 +1,10 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title>PID demo page</title>
+	<title>How PID controllers work?</title>
 	<link rel="stylesheet" href="style.css">
 
 	<script src="js/highcharts.js"></script>
-	<script src="js/exporting.js"></script>
-	<script src="js/export-csv.js"></script>
 	<script src="js/pid.js"></script>
 
 	<script src='https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML'></script>
@@ -50,17 +48,17 @@ var system2 = Object.assign({}, system, {
 </script>
 
 <div class="container">
-	<h1>PID demo</h1>
+	<h1>How PID controllers work?</h1>
 	<h2>Basics</h2>
 	<p>
-		A simple example: a piece of metal that we want to heat to certain temperature and keep it at that temperature. People usually demonstrate how PID works with a car model, but I don't have driving licence, so I will describe something that I have experience with.
+		Let's take a simple example: a piece of metal that we want to heat to certain temperature and keep it at that temperature.
 	</p>
 	<p>
-		Imagine we have a piece that we want to heat. We plug a thermocouple to it, wrap it with a heating tape, plug this heating tape via relay to the power and plug our controller to this relay so we can switch heating on and off. And let's say we want to heat it to <b>200°C</b>.
+		Imagine we have a piece that we want to heat. We plug a thermocouple to it, plug a peltie element to it and connect them to our controller box. Let's say we want to heat it to <b>200°C</b>.
 	</p>
 	<h3>Relay behaviour</h3>
 	<p>
-		The most simple thing that you can try is to heat if the temperature is below your setpoint and switch heating off if we are above the setpoint. Makes sence, but let's see how it will look like:
+		The most simple thing that we can try is to heat as hard as you can if the temperature is below the setpoint and cool as hard as we can if we are above the setpoint. Makes sence, but let's see how it will look like:
 	</p>
 	<div id="relay-pid" class="pid"></div>
 	<script type="text/javascript">
