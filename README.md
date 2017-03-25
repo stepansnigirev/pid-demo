@@ -44,13 +44,13 @@ As we are working in the ideal case, we will imagine that we are not just a simp
 
 The most simple thing that you can try is to heat if the temperature is below 200°C and cool if we are above the setpoint. Makes sence, but let's see how it will look like:
 
-![Relay controller](https://raw.githubusercontent.com/stepansnigirev/pid-demo/master/img/relay1.svg)
+![Relay controller](img/relay1.png)
 
 Looks not so bad, at the end we are actually at 200°C. But in the very beginning there is a huge overheat and some oscillations in the temperature that damping with time. After such way of cooking our knight will be probably fried and not very tasty.
 
 Also, taking into account that we are not an infinetely fast dragon and it takes some time to switch between heating and cooling, we will get even worse:
 
-![Relay controller with responce time](img/relay2.svg)
+![Relay controller with responce time](img/relay2.png)
 
 Here you see constant oscillations that never damp in time. We can do better.
 
@@ -62,7 +62,7 @@ A smarter way could be to apply heat that will be proportional to the temperatur
 
 By choosing a reasonable proportional gain _k<sub>P</sub>_ we can heat up the system without any oscillations:
 
-![P controller](img/p.svg)
+![P controller](img/p.png)
 
 Looks much better already! But we've got another problem — the system is at slightly lower temperature than we need. We could increase a setpoint to overcome this, but it is a bad way of doing that — if properties of the system will change we will end up at some other temperature. We don't want that, so we need to make better.
 
@@ -76,7 +76,7 @@ Now our output will look like this:
 
 ![](talk/img/pi-eq.png)
 
-![PI controller](img/pi.svg)
+![PI controller](img/pi.png)
 
 Great! Now we've reached the target temperature and don't have any oscillations! There are two small problems though. First, there is a small overheat in the very beginning, as while we were heating up from 20 to 200 degrees, integral part kept adding up and led to overheat. Another problem is that our controller is slower than the very first one operating in the relay mode. We can solve both of them and get better once again.
 
@@ -88,10 +88,10 @@ You can probably guess how the output will look like:
 
 ![](talk/img/pid-eq.png)
 
-![PI controller](img/pid.svg)
+![PI controller](img/pid.png)
 
 Now it looks exactly like we want — it quickly reaches the exact value of the target temperature, without any oscillations or overheating. Summing up, here how all three controllers look like:
 
-![PI controller](img/all-pid.svg)
+![PI controller](img/all-pid.png)
 
 ## The rest will appear later.
