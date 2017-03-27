@@ -10,15 +10,15 @@ There is also a [web demo](demo/) where you can play with a toy model, change pa
 
 # Table of contents
 
-- Ideal controller
-	- Relay controller
-	- P-controller
-	- PI-controller
-	- PID-controller
-	- Autotuning
-		- Ziegler–Nichols method
-		- Step responce method
-		- Relay method
+- [Ideal controller](#ideal-pid-controller)
+	- [Relay controller](#relay-controller)
+	- [P-controller](#p-controller)
+	- [PI-controller](#pi-controller)
+	- [PID-controller](#pid-controller)
+	- [Autotuning](#autotuning)
+		- [Ziegler–Nichols method](#zieglernichols-method)
+		- [Step responce](#step-responce)
+		- [Relay method](#relay-method)
 	- Ramping
 - Implementation issues
 	- Limited output and integral part
