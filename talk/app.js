@@ -230,28 +230,77 @@ var app = new Vue({
 			},
 			{
 				title: "Autotuning",
-				steps: 8,
-				kp: [3e-3, 1e-2, 3e-2, 5e-2, 7e-2, 8e-2, 9e-2, 8.5e-2],
-				callback: function(){
+				// steps: 8,
+				// kp: [3e-3, 1e-2, 3e-2, 5e-2, 7e-2, 8e-2, 9e-2, 8.5e-2],
+				// callback: function(){
+				// 	var s = Bulk(system);
+				// 	var o = s.getSteadyState(common.tset);
+				// 	s.t_det = o.t_det;
+				// 	s.t_heat = o.t_heat;
+				// 	doMagic({
+				// 		element: "classic-autotune",
+				// 		tset: common.tset,
+				// 		mode: "pid",
+				// 		kp: app.curslide.kp[app.step],
+				// 		ki: 0,
+				// 		kd: 0,
+				// 		system: s,
+				// 		dt: 1/60, // time step
+				// 		t: common.t, // detection step
+				// 		label: "P = "+app.curslide.kp[app.step]
+				// 	});
+				// },
+				init: function(){
+					// app.curslide.callback();
 					var s = Bulk(system);
 					var o = s.getSteadyState(common.tset);
 					s.t_det = o.t_det;
 					s.t_heat = o.t_heat;
 					doMagic({
 						element: "classic-autotune",
-						tset: common.tset,
-						mode: "pid",
-						kp: app.curslide.kp[app.step],
-						ki: 0,
-						kd: 0,
-						system: s,
-						dt: 1/60, // time step
-						t: common.t, // detection step
-						label: "P = "+app.curslide.kp[app.step]
+						pids: [
+							{
+								kp: 3e-2,
+								system: Bulk(s),
+								label: "k<sub>P</sub>=0.03",
+								chart: {
+									color: my_colors[1],
+								}
+							},
+							{
+								kp: 5e-2,
+								system: Bulk(s),
+								label: "k<sub>P</sub>=0.05",
+								chart: {
+									color: my_colors[2],
+								}
+							},
+							{
+								kp: 8.5e-2,
+								system: Bulk(s),
+								label: "k<sub>P</sub>=0.085",
+								chart: {
+									color: colors.red,
+								}
+							},
+							{
+								kp: 1e-1,
+								system: Bulk(s),
+								label: "k<sub>P</sub>=0.09",
+								chart: {
+									color: my_colors[3],
+								}
+							},
+						],
+						common: {
+							tset: common.tset,
+							mode: "pid",
+							ki: 0,
+							kd: 0,
+							dt: 1/60, // time step
+							t: common.t, // detection step
+						}
 					});
-				},
-				init: function(){
-					app.curslide.callback();
 				}
 			},
 			{ 	title: "Ziegler–Nichols method" 	},
